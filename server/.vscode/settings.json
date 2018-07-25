@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "*.js": "javascript"
+  },
+  "git.ignoreLimitWarning": true,
+}
