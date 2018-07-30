@@ -2,7 +2,10 @@
 module.exports = (sequelize, DataTypes) => {
   var Todo = sequelize.define('Todo', {
     content: DataTypes.STRING,
-    completed: DataTypes.BOOLEAN
+    completed: {
+      type: DataTypes.BOOLEAN,
+      default: false
+    }
   });
   Todo.associate = (models) => {
     Todo.belongsTo(models.Tenant, {

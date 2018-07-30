@@ -1,10 +1,32 @@
 const db = require('../models');
 
 module.exports = {
-  findAllTodo: () => db.Todo.findAll(),
-  findAllTodoByTenantId: (tenantId) => db.Todo.findAll({where: {tenantId}}),
-  findTodoById: (todoId) => db.Todo.find({where: { id: todoId}}),
+  findAllTodoByTenantId: (tenantId) => db.Todo.findAll({
+    where: {
+      tenantId
+    }
+  }),
+
+  findTodoByIdAndTenantId: (todoId, tenantId) => db.Todo.find({
+    where: {
+      id: todoId,
+      tenantId
+    }
+  }),
   createTodo: (todoObj) => db.Todo.create(todoObj),
-  updateTodoById: (todoId, todoObj) => db.Todo.update(todoObj, {where: {id: todoId}, returning: true}),
-  destroyTodoById: (todoId) => db.Todo.destroy({where: {id: todoId}})
+
+  updateTodoByIdAndTenantId: (todoId, tenantId, todoObj) => db.Todo.update(todoObj, {
+    where: {
+      id: todoId,
+      tenantId
+    },
+    returning: true
+  }), 
+  
+  destroyTodoByIdAndTenantId: (todoId, tenantId) => db.Todo.destroy({
+    where: {
+      id: todoId,
+      tenantId
+    }
+  })
 }

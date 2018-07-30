@@ -1,10 +1,11 @@
 const router = require('express').Router();
 const todoService = require('../Services/todoService');
+const { isAuthenticated } = require('../middleware/auth');
 
-router.get('/', todoService.getAllTodo);
-router.post('/', todoService.saveTodo);
-router.get('/:todoId', todoService.getTodo);
-router.put('/:todoId', todoService.updateTodo);
-router.delete('/:todoId', todoService.deleteTodo);
+router.get('/', isAuthenticated, todoService.getAllTodo);
+router.post('/', isAuthenticated, todoService.saveTodo);
+router.get('/:todoId', isAuthenticated, todoService.getTodo);
+router.put('/:todoId', isAuthenticated, todoService.updateTodo);
+router.delete('/:todoId', isAuthenticated, todoService.deleteTodo);
 
 module.exports = router;

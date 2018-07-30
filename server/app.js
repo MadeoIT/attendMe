@@ -3,10 +3,12 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const errorHandler = require('./middleware/error');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const { infoLogger, errorLogger } = require('./middleware/logger');
 
 infoLogger(app.get('env'));
 
+app.use(cookieParser());
 app.use(cors());
 app.use(morgan('tiny'));
 app.use(bodyParser.urlencoded({ extended: false }));

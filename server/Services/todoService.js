@@ -3,7 +3,8 @@ const NOT_FOUND = 'Resource not found';
 
 const getAllTodo = async(req, res, next) => {
   try {
-    const todos = await todoDAO.findAllTodo();
+    const { user } = req;
+    const todos = await todoDAO.findAllTodoByTenantId(user.id);
     res.status(200).send(todos);
 
   } catch (error) {
@@ -23,7 +24,8 @@ const saveTodo = async(req, res, next) => {
 
 const getTodo = async(req, res, next) => {
   try {
-    const todo = await todoDAO.findTodoById(req.params.todoId);
+    const { params, user } = req
+    const todo = await todoDAO.findTodoByIdAndTenantId(params.todoId, user.id)
    
     if(!todo) return res.status(404).send(NOT_FOUND);
     res.status(200).send(todo);
@@ -35,8 +37,8 @@ const getTodo = async(req, res, next) => {
 
 const updateTodo = async(req, res, next) => {
   try {
-    const { params, body } = req;
-    const responseBody = await todoDAO.updateTodoById(params.todoId, body);
+    const { params, body, user } = req;
+    const responseBody = await todoDAO.updateTodoByIdAndTenantId(params.todoId, user.id, body);
     const todo = responseBody[1][0]; //postgres returning body
     if(!todo) return res.status(404).send(NOT_FOUND);
     res.status(200).send(todo);
@@ -48,7 +50,8 @@ const updateTodo = async(req, res, next) => {
 
 const deleteTodo = async(req, res, next) => {
   try {
-    await todoDAO.destroyTodoById(req.params.todoId);
+    const { params, user } = req;
+    await todoDAO.destroyTodoByIdAndTenantId(params.todoId, user.id)
     res.status(200).send('Todo deleted');
 
   } catch (error) {

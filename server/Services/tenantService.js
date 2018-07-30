@@ -1,6 +1,8 @@
 const tenantDAO = require('../DAOs/tenantDAO');
 const bcrypt = require('bcryptjs');
 const config = require('config');
+const { changeObjectKeyValue } = require('../factory');
+const { tenantToTenantDTO } = require('../DTOs/tenantDTO');
 
 //Configuration constants
 const saltRounds = config.get('encryption.saltRounds');
@@ -30,34 +32,32 @@ const comparePassword = (password, hash) => {
     bcrypt.compare(password, hash, (err, res) => {
       if(err) return reject(err);
 
-      return resolve(res);
+      return resolve(res); //Return a boolean
     })
   })
 };
 
-const changeObjectProperty = (key, value, obj) => {
-  const newObj = { ...obj };
-  newObj[key] = value
-  return newObj
-};
-
 const saveTenant = async (tenantObj) => {
   try {
-    const { password } = tenantObj;
+    const { password, email } = tenantObj;
+    const tenant = await tenantDAO.findTenantByEmail(email);
+    
+    if(tenant) return false;
+    
     const salt = await generateSalt(saltRounds);
     const hashedPassword = await hashPassword(password, salt);
-    const newTenantObj = changeObjectProperty('password', hashedPassword, tenantObj);
-   
+    const newTenantObj = changeObjectKeyValue(tenantObj, 'password', hashedPassword);  
+    
     return await tenantDAO.createTenant(newTenantObj);
 
   } catch (error) {
-    
+    throw new Error(error);
   }
 };
 
 const validateTenant = async (email, password, done) => {
   try {
-    const tenant = await tenantDAO.findTenantByEmail(email);
+    const tenant = await tenantDAO.findTenantByConfirmedEmail(email);
     
     if(!tenant) return done(null, false);
     const res = await comparePassword(password, tenant.password);
@@ -68,9 +68,26 @@ const validateTenant = async (email, password, done) => {
   } catch (error) {
     return done(error);
   }
+};
+
+const validateTenantJwt = async (payload, done) => {
+  try {
+    const tenant = await tenantDAO
+      .findTenantByIdAndEmail(payload.sub, payload.name);
+  
+    if(!tenant) return done(null, false);
+
+    return done(null, tenant);
+
+  } catch (error) {
+    done(error, false);
+  }
 }
 
 module.exports = {
   saveTenant,
-  validateTenant
+  validateTenant,
+  validateTenantJwt,
+  generateSalt,
+  hashPassword
 }
