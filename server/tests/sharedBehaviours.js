@@ -1,13 +1,20 @@
+const db = require('../models');
 const { makePayload, createToken } = require('../middleware/token');
 const config = require('config');
-const { saveTenant } = require('../Services/tenantService');
+const { generateSalt, hashPassword } = require('../Services/tenantService');
 const faker = require('faker');
 
 const uuidv4 = require('uuid/v4');
+
 const tokenKey = config.get('encryption.jwtSk');
 const refreshTokenKey = config.get('encryption.jwtRefreshSk');
+const confirmationTokenKey = config.get('encryption.jwtConfirmationSk');
+
 const tokenExp = config.get('encryption.tokenExp');
 const refreshTokenExp = config.get('encryption.refreshTokenExp');
+const confirmationTokenExp = config.get('encryption.confirmationTokenExp');
+
+const saltRounds = config.get('encryption.saltRounds');
 
 exports.generateTokenAndCsrfToken = function (tenant) {
   const csrfToken = uuidv4();
@@ -27,10 +34,17 @@ exports.generateRefreshTokenAndCsrfToken = function (tenant) {
   }
 };
 
-exports.generateTenant = function () {
-  return saveTenant({
-    email: faker.internet.email(),
-    password: '123',
+exports.generateConfirmationToken = function (tenant) {
+  const payload = makePayload(tenant);
+  return createToken(payload, confirmationTokenKey, confirmationTokenExp);
+}
+
+exports.generateTenant = async function (tenantObj) {
+  const salt = await generateSalt(saltRounds);
+  const hashedPassword = await hashPassword(tenantObj.password, salt);
+  return db.Tenant.create({
+    email: tenantObj.email,
+    password: hashedPassword,
     confirmed: true
   });
 };
@@ -38,7 +52,7 @@ exports.generateTenant = function () {
 exports.generateFakeTenantObj = function () {
   return{
     email: faker.internet.email(),
-    password: faker.internet.password()
+    password: faker.internet.password(10)
   }
 }
 

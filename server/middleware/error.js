@@ -12,9 +12,9 @@ const errorHandler = (err, req, res, next) => {
     return res.status(500).send('Something went wrong');
   }
 
-  res.status(err.status).send(err.message);
+  res.status(err.status || 500).send(err.message);
 };
 
-module.exports = (err, req, res, next) => {
+module.exports = {
   errorHandler
 }

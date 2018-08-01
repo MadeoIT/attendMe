@@ -1,6 +1,5 @@
 const { changeObjectKeyName, changeObjectKeyValue } = require('../factory');
 
-
 describe('Factory functions', () => {
   it('should substitute key name in objet', () => {
     const oldObject = {

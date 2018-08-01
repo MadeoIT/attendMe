@@ -1,22 +1,22 @@
 const Joi = require('joi');
 
-//TODO: add other properties
 const tenantSchema = {
+  googleId: Joi.string(),
   confirmed: Joi.boolean().forbidden(),
-  password: Joi.string(),
-  email: Joi.string(),
+  blocked: Joi.boolean(),
+  password: Joi.string().min(8),
+  email: Joi.string().required(),
   tenantId: Joi.number()
 };
 
-const validateTenant = (body, res) => {
+const isTenantObjectNotValid = (body) => {
   const result = Joi.validate(body, tenantSchema);
   if(result.error) {
-    res.status(400).send(result.error.details[0].message);
-    return;
+    return result.error.details[0].message
   }
-  return;
+  return false;
 };
 
 module.exports = {
-  validateTenant
+  isTenantObjectNotValid
 }

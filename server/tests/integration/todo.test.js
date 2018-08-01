@@ -2,20 +2,23 @@ const request = require('supertest');
 const db = require('../../models');
 
 //This helpers create a user tenant with valid token and csrf token
-const { generateTenant, generateTokenAndCsrfToken, generateFakeTodoObj } = require('../sharedBehaviours');
+const {
+  generateTenant,
+  generateTokenAndCsrfToken,
+  generateFakeTodoObj,
+  generateFakeTenantObj
+} = require('../sharedBehaviours');
 
 describe('Todo integration test', () => {
-  let server;
+  let server, token, csrfToken, tenant_FK;
   const baseUrl = '/api/todos'
-  let token;
-  let csrfToken;
-  let tenant_FK;
 
   beforeEach(async () => {
     server = require('../../app');
-    const tenant = await generateTenant();
+    const fakeTenant = generateFakeTenantObj()
+    const tenant = await generateTenant(fakeTenant);
     result = generateTokenAndCsrfToken(tenant);
-    token  = result.token;
+    token = result.token;
     csrfToken = result.csrfToken;
     tenant_FK = tenant.id;
   });
@@ -36,7 +39,6 @@ describe('Todo integration test', () => {
   //TODO: bugged test
   it('should add a todo and foreign key', async () => {
     const fakeTodo = generateFakeTodoObj();
-    fakeTodo.tenantId = tenant_FK;
 
     const res = await request(server)
       .post(baseUrl)
@@ -123,7 +125,7 @@ describe('Todo integration test', () => {
         .delete(`${baseUrl}/${todoId}`)
         .set('Cookie', `token=${token}`)
         .set('Authorization', csrfToken);
-        
+
       const remainingTodos = await db.Todo.findAll();
 
       expect(res.status).toBe(200);

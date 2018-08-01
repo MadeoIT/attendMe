@@ -1,7 +1,7 @@
 const app = require('express')();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const errorHandler = require('./middleware/error');
+const { errorHandler } = require('./middleware/error');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const { infoLogger, errorLogger } = require('./middleware/logger');

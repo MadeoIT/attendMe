@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const makePayload = (user, csrfToken) => {
   return {
     sub: user.id,
+    googleId: user.googleId,
     name: user.email,
     iat: Date.now(),
     csrfToken
@@ -16,7 +17,6 @@ const createToken = (payload, tokenKey, expiration) => {
   return jwt.sign(payload, tokenKey, options);
 };
 
-
 const verifyToken = (token, key) => {
   try {
     return jwt.verify(token, key);
@@ -25,19 +25,9 @@ const verifyToken = (token, key) => {
   }
 }
 
-const doesNeedNewToken = (payload, refreshPayload) => {
-  if (payload) return false;
-  if (refreshPayload) return true;
-  
-  throw new Error('Unauthorized');
-}
-
-
 
 module.exports = {
   verifyToken,
-  doesNeedNewToken,
-
   createToken,
   makePayload
 }

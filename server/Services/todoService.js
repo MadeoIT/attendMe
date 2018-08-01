@@ -14,7 +14,9 @@ const getAllTodo = async(req, res, next) => {
 
 const saveTodo = async(req, res, next) => {
   try {
-    const todo = await todoDAO.createTodo(req.body);
+    const { user, body } = req;
+    const todoWithFk = {...body, tenantId: user.id}
+    const todo = await todoDAO.createTodo(todoWithFk);
     res.status(200).send(todo);
 
   } catch (error) {

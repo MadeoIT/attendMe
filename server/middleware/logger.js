@@ -45,7 +45,7 @@ if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
 const errorLogger = (err) => {
   logger.log({
     level: 'error',
-    message: err.message + " " + new Date()
+    message: err.message
   });
 }
 

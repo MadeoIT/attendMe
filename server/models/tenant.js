@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   var Tenant = sequelize.define('Tenant', {
+    googleId: DataTypes.STRING,
     fullName: DataTypes.STRING,
     email: {
       type: DataTypes.STRING,
@@ -14,6 +15,10 @@ module.exports = (sequelize, DataTypes) => {
       unique: true
     },
     confirmed : {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    blocked : {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     }

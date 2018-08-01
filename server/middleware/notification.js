@@ -15,13 +15,8 @@ const transport = nodemailer.createTransport({
   }
 });
 
-const sendEmailNodemailer = async (message) => {
-  try {
-    return transport.sendMail(message);
-
-  } catch (error) {
-    throw new Error(error);
-  }
+const sendEmailNodemailer = (message) => {
+  transport.sendMail(message);
 };
 
 const createEmailMessage = (from, to, subject, html) => {
@@ -33,8 +28,8 @@ const createEmailMessage = (from, to, subject, html) => {
   }
 };
 
-const getMailService = () => {
-  switch (process.env.NODE_ENV) {
+const getMailService = (environment) => {
+  switch (environment) {
     case 'test':
       return sendEmailNodemailer;
     case 'development':
@@ -47,7 +42,7 @@ const getMailService = () => {
   }
 };
 
-const sendEmail = getMailService();
+const sendEmail = getMailService(process.env.NODE_ENV);
 
 module.exports = {
   sendEmail,
