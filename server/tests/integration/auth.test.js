@@ -89,8 +89,7 @@ describe('authentication', () => {
       const res = await request(server)
         .post(reloginUrl)
         .set('Cookie', `refresh-token=${refreshToken}`)
-        .set('Authorization', csrfToken);
-
+       
       expect(res.status).toBe(200);
       expect(res.header['set-cookie']).toBeDefined();
     });
@@ -99,11 +98,66 @@ describe('authentication', () => {
       const res = await request(server)
         .post(reloginUrl)
         .set('Cookie', `refresh-token=123fakeTokenAbc`)
-        .set('Authorization', csrfToken);
 
       expect(res.status).toBe(401);
     })
   });
+
+  describe('confirm email', () => {
+    let confirmationToken, fakeTenant;
+    const baseUrl = '/api/auth/signup';
+
+    beforeEach( async () => {
+      fakeTenant = generateFakeTenantObj();
+      const tenant = await generateTenant(fakeTenant);
+      confirmationToken = generateConfirmationToken(tenant);
+    });
+
+    it('should confirm the email of the user', async () => {
+      const res = await request(server)
+        .get(`${baseUrl}/${confirmationToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.confirmed).toBeTruthy();
+      expect(res.body.email).toBe(fakeTenant.email);
+    });
+  });
+
+  describe('reset password', () => {
+    let resetToken, fakeTenant, tenant;
+    const baseUrl = '/api/auth/password';
+
+    beforeEach( async () => {
+      fakeTenant = generateFakeTenantObj();
+      tenant = await generateTenant(fakeTenant);
+      resetToken = generateConfirmationToken(tenant);
+    });
+
+    it('should reset password', async () => {
+      fakeTenant.password = '987654321'
+      const res = await request(server)
+        .post(`${baseUrl}/${resetToken}`)
+        .send({ password: fakeTenant.password });
+
+      expect(res.status).toBe(200);
+    })
+  });
+
+  describe('google auth20', () => {
+    const baseUrl = '/api/auth/google';
+
+    it('should hit the callback end point', async () => {
+      const res = await request(server)
+        .get(baseUrl);
+      
+      expect(res.status).toBe(200);
+      expect(res.body.email).toBe('gioioso.matteo@gmail.com');
+    });
+
+    it('should not add a new user', async () => {
+      
+    })
+  })
 
   describe('signup', () => {
     const baseUrl = '/api/auth/signup';
@@ -150,44 +204,4 @@ describe('authentication', () => {
       expect(res.error.text).toContain('Test Error / find tenant by email');
     })
   });
-
-  describe('confirm email', () => {
-    let confirmationToken, fakeTenant;
-    const baseUrl = '/api/auth/signup';
-
-    beforeEach( async () => {
-      fakeTenant = generateFakeTenantObj();
-      const tenant = await generateTenant(fakeTenant);
-      confirmationToken = generateConfirmationToken(tenant);
-    });
-
-    it('should confirm the email of the user', async () => {
-      const res = await request(server)
-        .get(`${baseUrl}/${confirmationToken}`);
-
-      expect(res.status).toBe(200);
-      expect(res.body.confirmed).toBeTruthy();
-      expect(res.body.email).toBe(fakeTenant.email);
-    });
-  });
-
-  describe('reset password', () => {
-    let resetToken, fakeTenant, tenant;
-    const baseUrl = '/api/auth/password';
-
-    beforeEach( async () => {
-      fakeTenant = generateFakeTenantObj();
-      tenant = await generateTenant(fakeTenant);
-      resetToken = generateConfirmationToken(tenant);
-    });
-
-    it('should reset password', async () => {
-      fakeTenant.password = '987654321'
-      const res = await request(server)
-        .post(`${baseUrl}/${resetToken}`)
-        .send({ password: fakeTenant.password });
-
-      expect(res.status).toBe(200);
-    })
-  })
 });

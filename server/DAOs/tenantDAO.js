@@ -15,8 +15,7 @@ module.exports = {
   findTenantByIdAndEmail: (tenantId, email) => db.Tenant.findOne({
     where: {
       id: tenantId,
-      email: email,
-      confirmed: true
+      email: email
     }
   }),
   createTenant: (tenantObj) => db.Tenant.create(tenantObj),

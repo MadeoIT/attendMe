@@ -16,6 +16,11 @@
     "refreshTokenExp": "7d",
     "confirmationTokenExp":  "5m"
   },
+  "googleAuth": {
+    "clientID": "335780936681-05gf2gmmcjako2lot794vp4o86gmlc05.apps.googleusercontent.com",
+    "clientSecret": "poTLD-hCu9n-aDE5hXqm0Nfy",
+    "callbackURL": "/api/auth/google/callback"
+  },
   "emailService": {
     "EMAIL_HOST": "smtp.ethereal.email",
     "EMAIL_USER": "rjjaorzpkskqbkm7 @ethereal.email",

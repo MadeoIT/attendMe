@@ -34,16 +34,58 @@ const sendTokenAndRefreshToken = (req, res) => {
 //TODO: maybe csrfToken does not need to be refreshed
 const sendToken = (req, res) => {
   const { user } = req;
-  const csrfToken = uuidv4();
-  const payload = makePayload(user, csrfToken);
+  const payload = makePayload(user);
   const token = createToken(payload, tokenKey, tokenExp);
 
   createCookie(res, 'token', token)
 
-  res.status(200).send({csrfToken});
+  res.status(200).send({});
+}
+
+
+
+
+const { updateTenantTest } = require('../Services/tenantService');
+const { generateSalt, hashPassword } = require('../middleware/encryption');
+const messages = require('../middleware/messages');
+const { sendNotificationTest } = require('../Services/notificationService');
+
+const fields = {
+  password: async (user) => {
+    const salt = await generateSalt(saltRounds);
+    const hashedPassword = await hashPassword(user.password, salt);
+    return { password: hashedPassword }
+  },
+  confirmed: async (req) => {
+    return { confirmed: true }
+  },
+  tenant: async (req) => req.body
+}
+
+
+const resetPassowrd = (req, res, next) => {
+  try {
+    const { user } = req;
+
+    const tenantObj = await fields['password'](user);
+
+    const tenant = await updateTenantTest(tenantObj);
+
+    if(!tenant) {
+      return res.status(404).send('Resource not found');
+    }
+    
+    await sendNotificationTest('email')(messages.resetPasswordConfirmation);
+    res.status(200).send()
+
+  } catch (error) {
+    next(error);
+  }
 }
 
 module.exports = {
   sendTokenAndRefreshToken,
-  sendToken
+  sendToken,
+
+  resetPassowrd
 }

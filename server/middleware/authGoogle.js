@@ -1,12 +1,21 @@
 const passport = require('passport');
-const { GoogleStrategy: Strategy } = require('passport-google-oauth20');
+const config = require('config');
+const GoogleStrategy = require('passport-google-oauth20').Strategy
 
-const googleAuth = new GoogleStrategy();
+const clientID = config.get('googleAuth.clientID');
+const clientSecret = config.get('googleAuth.clientSecret');
+const callbackURL = config.get('googleAuth.callbackURL');
 
-passport.use(googleAuth);
+const googleAuth = new GoogleStrategy(
+  { clientID, clientSecret, callbackURL }, 
+  async (accessToken, refreshToken, profile, done) => {
+    const body = {...profile};
+    return done(null, body);
+  }
+);
 
-const authenticateGoogle = passport.authenticate('google', { session: false });
+passport.use('google', googleAuth);
 
 module.exports = {
-  authenticateGoogle
+  googleAuth
 }

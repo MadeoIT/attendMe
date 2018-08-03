@@ -1,39 +1,9 @@
 const tenantDAO = require('../DAOs/tenantDAO');
-const bcrypt = require('bcryptjs');
 const config = require('config');
 const { changeObjectKeyValue } = require('../factory');
 const { isTenantObjectNotValid } = require('../models/validationModels/tenantValidation');
 const saltRounds = config.get('encryption.saltRounds');
-
-const generateSalt = (saltRounds) => {
-  return new Promise((resolve, reject) => {
-    bcrypt.genSalt(saltRounds, (err, salt) => {
-      if(err) return reject(err);
-
-      return resolve(salt); 
-    });
-  })
-};
-
-const hashPassword = (password, salt) => {
-  return new Promise((resolve, reject) => {
-    bcrypt.hash(password, salt, (err, hash) => {
-      if(err) return reject(err);
-
-      return resolve(hash);
-    })
-  })
-};
-
-const comparePassword = (password, hash) => {
-  return new Promise((resolve, reject) => {
-    bcrypt.compare(password, hash, (err, res) => {
-      if(err) return reject(err);
-
-      return resolve(res); //Return a boolean
-    })
-  })
-};
+const { comparePassword, generateSalt, hashPassword } = require('../middleware/encryption');
 
 /**
  * Object with different saving method
@@ -43,10 +13,14 @@ const savingMethod = {
   local: async (tenant) => {
     const salt = await generateSalt(saltRounds);
     const hashedPassword = await hashPassword(tenant.password, salt);
-    return changeObjectKeyValue(tenant, 'password', hashedPassword); 
+    return changeObjectKeyValue(tenant, 'password', hashedPassword);
   },
   google: async (tenant) => {
-    return tenant;
+    return { 
+      password: '',
+      googleId: tenant.id,
+      email: tenant.email
+    }
   },
   facebook: async (tenant) => {
     return tenant;
@@ -61,48 +35,77 @@ const savingMethod = {
 const saveTenant = (method) => {
   return async (req, res, next) => {
     try {
+
       const { body } = req;
-  
-      if(isTenantObjectNotValid(body)){
+
+      if (isTenantObjectNotValid(body)) {
         const message = isTenantObjectNotValid(body);
         return res.status(400).send(message);
       };
-  
+
       const { email } = body;
       const foundTenant = await tenantDAO.findTenantByEmail(email);
-      
-      if(foundTenant) return res.status(400).send('Email already exist');
-      
-      const tenantObj = await savingMethod[method](body); //Inject the method in the controller
-      
+
+      if (foundTenant) {
+        return res.status(400).send('Email already exist');
+      };
+
+      const tenantObj = await savingMethod[method](body);
       const savedTenant = await tenantDAO.createTenant(tenantObj);
+
       req.user = savedTenant;
       next();
-  
+
     } catch (error) {
       next(error);
     }
   };
-}
+};
 
-const attributeType = {
-  emailAndPassword: {
+const getTenantByEmail = async (email, done) => {
+  try {
 
-  },
-  token: {
+    const tenant = await tenantDAO.findTenantByEmail(email);
 
-  },
-  email: {
+    if (!tenant) return done(null, false);
 
+    return done(null, tenant);
+
+  } catch (error) {
+    done(error)
   }
+};
+
+const fields = {
+  password: async (req) => {
+    const salt = await generateSalt(saltRounds);
+    const hashedPassword = await hashPassword(req.body.password, salt);
+    return { password: hashedPassword }
+  },
+  confirmed: async (req) => {
+    return { confirmed: true }
+  },
+  tenant: async (req) => req.body
 }
 
-const checkTenant = (type, ...args) => {
-  return async (args) => {
+const updateTenant = (fieldToUpdate) => {
+  return async (req, res, next) => {
     try {
-      
+
+      const { id } = req.user;
+
+      const tenantObj = await fields[fieldToUpdate](req);
+
+      const result = await tenantDAO.updateTenantById(tenantObj, id);
+
+      const tenant = result[1][0]; //Postgre returning object
+
+      req.user = tenant
+
+      next();
+
     } catch (error) {
-      done(error)
+      next(error);
     }
   }
 }
@@ -110,12 +113,12 @@ const checkTenant = (type, ...args) => {
 const checkTenantCredential = async (email, password, done) => {
   try {
     const tenant = await tenantDAO.findTenantByEmailAndConfirmed(email);
-    
-    if(!tenant) return done(null, false)
+
+    if (!tenant) return done(null, false)
 
     const res = await comparePassword(password, tenant.password);
 
-    if(!res) return done(null, false);
+    if (!res) return done(null, false);
     return done(null, tenant);
 
   } catch (error) {
@@ -123,72 +126,16 @@ const checkTenantCredential = async (email, password, done) => {
   }
 };
 
-const checkTenantToken = async (payload, done) => {
-  try {
-    const tenant = await tenantDAO.findTenantByIdAndEmail(payload.sub, payload.name);
-  
-    if(!tenant) return done(null, false);
-
-    return done(null, tenant);
-
-  } catch (error) {
-    done(error, false);
-  }
-};
-
-const checkTenantEmail = async (req, res, next) => {
-  try {
-    const { email } = req.body;
-    const tenant = await tenantDAO.findTenantByEmail(email);
-    if(!tenant) return res.status(404).send('Email is not found');
-
-    req.user = tenant;
-    next();
-
-  } catch (error) {
-    next(error);
-  }
-};
-
-const confirmTenantEmail = async (payload, done) => {
-  try {
-    const tenantObj = { confirmed: true };
-    const result = await tenantDAO.updateTenantById(tenantObj, payload.sub);
-    const tenant = result[1][0]; //Postgre returning object
-    if(!tenant) return done(null, false);
-    
-    return done(null, tenant);
-
-  } catch (error) {
-    done(error);
-  }
-};
-
-const resetTenantPassword = async (req, payload, done) => {
-  try {
-    const { password } = req.body;
-    const salt = await generateSalt(saltRounds);
-    const hashedPassword = await hashPassword(password, salt);
-    const tenantObj = { password: hashedPassword };
-    const result = await tenantDAO.updateTenantById(tenantObj, payload.sub);
-    const tenant = result[1][0]; //Postgre returning object
-    
-    if(!tenant) return done(null, false);
-
-    return done(null, tenant);
-
-  } catch (error) {
-    done(error);
-  }
-};
+const updateTenantTest = async (tenantObj) => {
+  const result = await tenantDAO.updateTenantById(tenantObj, id);
+  return result[1][0]; //Postgre returning object
+}
 
 module.exports = {
   saveTenant,
   checkTenantCredential,
-  checkTenantToken,
-  confirmTenantEmail,
-  resetTenantPassword,
-  checkTenantEmail,
-  generateSalt,
-  hashPassword
+  getTenantByEmail,
+  updateTenant,
+
+  updateTenantTest
 }

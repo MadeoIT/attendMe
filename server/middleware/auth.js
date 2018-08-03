@@ -1,7 +1,8 @@
 const passport = require('passport');
+const { googleAuth } = require('./authGoogle');
 const { Strategy: JwtStrategy } = require('passport-jwt');
 const LocalStrategy = require('passport-local');
-const { checkTenantCredential, checkTenantToken, confirmTenantEmail, resetTenantPassword } = require('../Services/tenantService');
+const { checkTenantCredential, getTenantByEmail } = require('../Services/tenantService');
 const config = require('config');
 const { changeObjectKeyName } = require('../factory');
 
@@ -31,25 +32,23 @@ const urlTokenExtractor = function (req) {
 const localOption = {
   usernameField: 'email'
 };
+const localEmailOption =  {
+  usernameField: 'email',
+  passwordField: 'email',
+}
 const jwtOption = {
   jwtFromRequest: cookieTokenExtractor, //Custom extractor from cookie
   secretOrKey: config.get('encryption.jwtSk'),
   passReqToCallback: true //The allow request object in the callback
 };
-const jwtRefreshOption = {
-  jwtFromRequest: cookieRefreshTokenExtractor,
-  secretOrKey: config.get('encryption.jwtRefreshSk'),
-  passReqToCallback: true
-};
-const jwtConfirmationOptions = {
-  jwtFromRequest: urlTokenExtractor,
-  secretOrKey: config.get('encryption.jwtConfirmationSk'),
-  passReqToCallback: true 
-}
 
 //Strategy functions
 const login = new LocalStrategy(localOption, async(username, password, done) => {
   await checkTenantCredential(username, password, done);
+});
+
+const email = new LocalStrategy(localEmailOption, async(username, _, done) => {
+  await getTenantByEmail(username, done);
 });
 
 const jwtAuth = new JwtStrategy(jwtOption, async(req, payload, done) => {
@@ -61,40 +60,54 @@ const jwtAuth = new JwtStrategy(jwtOption, async(req, payload, done) => {
   return done(null, newPayload);
 });
 
-const jwtRefreshAuth = new JwtStrategy(jwtRefreshOption, async(req, payload, done) => {
-  const csrfToken = req.headers['authorization'];
- 
-  if(csrfToken !== payload.csrfToken) return done(null, false); //verify csrf token
+const options = {
+  jwtConfirmation: {
+    jwtFromRequest: urlTokenExtractor,
+    secretOrKey: config.get('encryption.jwtConfirmationSk'),
+    passReqToCallback: true 
+  },
+  jwtRefresh: {
+    jwtFromRequest: cookieRefreshTokenExtractor,
+    secretOrKey: config.get('encryption.jwtRefreshSk'),
+    passReqToCallback: true
+  }
+};
 
-  await checkTenantToken(payload, done); //If verified validate the tenant
-});
-
-const jwtConfirmationAuth = new JwtStrategy(jwtConfirmationOptions , async (_, payload, done) => {
-  await confirmTenantEmail(payload, done);
-});
-
-const jwtResetPasswordAuth = new JwtStrategy(jwtConfirmationOptions, async (req, payload, done) => {
-  await resetTenantPassword(req, payload, done);
-});
-
+/**
+ * Build a strategy injecting the options required
+ * @param {String} strategyType type of the strategy
+ * @returns {Object} Return a strategy object
+ * Avoid code duplications for similar strategy
+ * This function validate any jwt token and check if the tenant/user email exists
+ */
+const jwtOptionalStrategyBuilder = (strategyType) => {
+  return new JwtStrategy(options[strategyType], async(_, payload, done) => {
+    const email = payload.name;
+    await getTenantByEmail(email, done);
+  });
+};
 
 //Middleware configurations
-passport.use(login);
-passport.use(jwtAuth);
-passport.use('jwt-refresh', jwtRefreshAuth);
-passport.use('jwt-confirm', jwtConfirmationAuth);
-passport.use('jwt-reset', jwtResetPasswordAuth);
+passport.use('local', login);
+passport.use('email', email);
+passport.use('jwt', jwtAuth);
+passport.use('jwt-refresh', jwtOptionalStrategyBuilder('jwtRefresh'));
+passport.use('jwt-confirm', jwtOptionalStrategyBuilder('jwtConfirmation'));
+passport.use('jwt-reset', jwtOptionalStrategyBuilder('jwtConfirmation'));
+passport.use('google', googleAuth);
 
-const authenticate = passport.authenticate('local', {session: false});
-const isAuthenticated = passport.authenticate('jwt', {session: false});
-const isRefreshTokenValid = passport.authenticate('jwt-refresh', {session: false});
-const isConfirmationTokenValid = passport.authenticate('jwt-confirm', {session: false});
-const isResetTokenValid = passport.authenticate('jwt-reset', {session: false});
+/**
+ * Get an validation method
+ * @param {String} validationStrategy name of the strategy. Ex: 'jwt', 'email'
+ * @returns {Function} return an authentication function
+ */
+const isValid = (validationStrategy) => {
+  return passport.authenticate(validationStrategy, {session: false})
+}
+
+const googleScope = passport.authenticate('google', { scope: ['profile'] });
 
 module.exports = {
-  authenticate,
-  isAuthenticated,
-  isRefreshTokenValid,
-  isConfirmationTokenValid,
-  isResetTokenValid
+  isValid,
+  googleScope
 }

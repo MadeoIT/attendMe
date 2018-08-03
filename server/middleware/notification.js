@@ -28,6 +28,14 @@ const createEmailMessage = (from, to, subject, html) => {
   }
 };
 
+/**
+ * Depending on the enviroment variable return the email service
+ * Ex: if the env is 'production' you would like to send email
+ * with dedicated email provider, Mailgun, Sendgrid.
+ * While in testing and development another kind of service.
+ * @param {String} environment enviroment variable
+ * @returns {Function} the function correspondant to the service
+ */
 const getMailService = (environment) => {
   switch (environment) {
     case 'test':
@@ -41,7 +49,6 @@ const getMailService = (environment) => {
       return
   }
 };
-
 const sendEmail = getMailService(process.env.NODE_ENV);
 
 module.exports = {
