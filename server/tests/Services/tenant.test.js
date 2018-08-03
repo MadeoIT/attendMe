@@ -1,4 +1,4 @@
-const { checkTenantCredential, saveTenant } = require('../../Services/tenantService');
+const { checkTenantCredential, saveTenant} = require('../../Services/tenantService');
 const { generateTenant, generateFakeTenantObj } = require('../sharedBehaviours');
 const db = require('../../models');
 const bcrypt = require('bcryptjs');
@@ -46,18 +46,13 @@ describe('Tenant', () => {
   });
   describe('save tenant', () => {
     const fakeTenant = generateFakeTenantObj();
-    const req = {
-      body: {...fakeTenant}
-    };
-    const res = {};
-    const next = () => {};
 
     it('should save a tenant', async() => {
-      await saveTenant('local')(req, res, next);
+      const tenant = await saveTenant(fakeTenant);
 
-      expect(req.user).toBeDefined();
-      expect(req.user.email).toBe(fakeTenant.email);
-      expect(req.user.password).not.toBe(fakeTenant.password);
+      expect(tenant).toBeDefined();
+      expect(tenant.email).toBe(fakeTenant.email);
+      expect(tenant.id).toBeDefined();
     });
   })
   //TODO: update test for update and save

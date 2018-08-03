@@ -1,16 +1,20 @@
-const tenantDAO = require('../DAOs/tenantDAO');
+const Joi = require('joi');
 const config = require('config');
+
+const tenantDAO = require('../DAOs/tenantDAO');
 const { changeObjectKeyValue } = require('../factory');
-const { isTenantObjectNotValid } = require('../models/validationModels/tenantValidation');
+const { tenantSchema } = require('../models/validationModels/tenantValidation');
 const saltRounds = config.get('encryption.saltRounds');
 const { comparePassword, generateSalt, hashPassword } = require('../middleware/encryption');
 
 /**
- * Object with different saving method
- * @returns {Object} return an object to be saved depending on the method
+ * Object that contains method to output tenant object
+ * @param {Object} tenant
+ * @returns {Object} tenant object
+ * Those object can be used to update or persist
  */
-const savingMethod = {
-  local: async (tenant) => {
+const tenantObjects = {
+  password: async (tenant) => {
     const salt = await generateSalt(saltRounds);
     const hashedPassword = await hashPassword(tenant.password, salt);
     return changeObjectKeyValue(tenant, 'password', hashedPassword);
@@ -22,46 +26,45 @@ const savingMethod = {
       email: tenant.email
     }
   },
-  facebook: async (tenant) => {
-    return tenant;
+  confirmed: async () => {
+    return { confirmed: true }
   }
 };
 
-/**
- * Save a tenant or user depending on the chosen method
- * @param {string} method the method should be 'google', 'local, 'facebook'
- * @returns {Function} middleware function
- */
-const saveTenant = (method) => {
-  return async (req, res, next) => {
-    try {
+//Validate tenant object check if tenant email already exist and then persist
+const saveTenant = async (tenant) => {
+  const result = Joi.validate(tenant, tenantSchema);
 
-      const { body } = req;
-
-      if (isTenantObjectNotValid(body)) {
-        const message = isTenantObjectNotValid(body);
-        return res.status(400).send(message);
-      };
-
-      const { email } = body;
-      const foundTenant = await tenantDAO.findTenantByEmail(email);
-
-      if (foundTenant) {
-        return res.status(400).send('Email already exist');
-      };
-
-      const tenantObj = await savingMethod[method](body);
-      const savedTenant = await tenantDAO.createTenant(tenantObj);
-
-      req.user = savedTenant;
-      next();
-
-    } catch (error) {
-      next(error);
+  if(result.error) {
+    return { 
+      result: false, 
+      message: result.error.details[0].message 
     }
   };
+  
+  const foundTenant = await tenantDAO.findTenantByEmail(tenant.email);
+
+  if (foundTenant) {
+    return { 
+      result: false, 
+      message: 'Email already exist'
+    }
+  }
+
+  return await tenantDAO.createTenant(tenant);
 };
 
+const updateTenant = async (tenant, id) => {
+  const result = await tenantDAO.updateTenantById(tenant, id);
+  return result[1][0]; //Postgre returning object
+};
+
+/**
+ * It check whether the tenant exist in the database
+ * @param {String} email 
+ * @param {Function} done 
+ * This function is used by passportJs middleware
+ */
 const getTenantByEmail = async (email, done) => {
   try {
 
@@ -76,40 +79,13 @@ const getTenantByEmail = async (email, done) => {
   }
 };
 
-const fields = {
-  password: async (req) => {
-    const salt = await generateSalt(saltRounds);
-    const hashedPassword = await hashPassword(req.body.password, salt);
-    return { password: hashedPassword }
-  },
-  confirmed: async (req) => {
-    return { confirmed: true }
-  },
-  tenant: async (req) => req.body
-}
-
-const updateTenant = (fieldToUpdate) => {
-  return async (req, res, next) => {
-    try {
-
-      const { id } = req.user;
-
-      const tenantObj = await fields[fieldToUpdate](req);
-
-      const result = await tenantDAO.updateTenantById(tenantObj, id);
-
-      const tenant = result[1][0]; //Postgre returning object
-
-      req.user = tenant
-
-      next();
-
-    } catch (error) {
-      next(error);
-    }
-  }
-}
-
+/**
+ * Check email and password of the tenant
+ * @param {String} email 
+ * @param {String} password 
+ * @param {Function} done 
+ * This function is used by passportJs middleware
+ */
 const checkTenantCredential = async (email, password, done) => {
   try {
     const tenant = await tenantDAO.findTenantByEmailAndConfirmed(email);
@@ -126,16 +102,11 @@ const checkTenantCredential = async (email, password, done) => {
   }
 };
 
-const updateTenantTest = async (tenantObj) => {
-  const result = await tenantDAO.updateTenantById(tenantObj, id);
-  return result[1][0]; //Postgre returning object
-}
 
 module.exports = {
   saveTenant,
   checkTenantCredential,
   getTenantByEmail,
   updateTenant,
-
-  updateTenantTest
+  tenantObjects
 }

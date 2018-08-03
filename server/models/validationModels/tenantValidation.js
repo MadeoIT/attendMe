@@ -9,14 +9,7 @@ const tenantSchema = {
   tenantId: Joi.number()
 };
 
-const isTenantObjectNotValid = (body) => {
-  const result = Joi.validate(body, tenantSchema);
-  if(result.error) {
-    return result.error.details[0].message
-  }
-  return false;
-};
 
 module.exports = {
-  isTenantObjectNotValid
+  tenantSchema
 }

@@ -143,7 +143,7 @@ describe('authentication', () => {
     })
   });
 
-  describe('google auth20', () => {
+  describe.skip('google auth20', () => {
     const baseUrl = '/api/auth/google';
 
     it('should hit the callback end point', async () => {
@@ -175,6 +175,7 @@ describe('authentication', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.email).toBe(tenantObj.email);
+      expect(res.body.password).not.toBe(tenantObj.password);
       expect(res.body.confirmed).toBeFalsy();
     });
 

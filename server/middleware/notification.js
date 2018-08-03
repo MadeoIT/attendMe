@@ -16,7 +16,7 @@ const transport = nodemailer.createTransport({
 });
 
 const sendEmailNodemailer = (message) => {
-  transport.sendMail(message);
+  return transport.sendMail(message);
 };
 
 const createEmailMessage = (from, to, subject, html) => {

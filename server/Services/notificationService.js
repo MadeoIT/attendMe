@@ -1,5 +1,4 @@
-const messages = require('../middleware/messages');
-const { sendEmail, createEmailMessage } = require('../middleware/notification');
+const { sendEmail } = require('../middleware/notification');
 
 /**
  * Send an email to the user upon chosing a type of message
@@ -7,26 +6,10 @@ const { sendEmail, createEmailMessage } = require('../middleware/notification');
  * @returns {void} it simply terminate the request by sendind the email
  * The type of message should be injected in the controller
  */
-const sendNotification = (typeOfNotification) => async (req) => {
-
-  const { user } = req;
-
-  const messageProperty = messages[typeOfNotification](user);
-
-  const message = createEmailMessage(...messageProperty);
-
-  await sendEmail(message);
-
-  req.responseObj = user;
-
-};
-
-const sendNotificationTest = (notificationService) => async (message) => {
-  await sendEmail(message)
+const sendNotification = (notificationService) => (message) => {
+  return sendEmail(message);
 }
 
 module.exports = {
-  sendNotification,
-
-  sendNotificationTest
+  sendNotification
 }
