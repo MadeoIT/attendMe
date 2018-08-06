@@ -50,6 +50,15 @@ const messages = {
       and contact us!</p>`;
 
     return createEmailMessage('resetPassword@todo.com', tenant.email, 'Reset password successful',  html);
+  },
+
+  geolocationMismatch: (tenant) => {
+    const html = 
+    `<h1>Hello ${tenant.email}</h1></br>
+      <h2>You have recently logged in another location</h2>
+      <p>If you did not recognize this activity you should reset your password</p>`;
+
+    return createEmailMessage('account-activity@todo.com', tenant.email, 'Recent log in',  html);
   }
   
 };

@@ -102,7 +102,7 @@ describe('authentication', () => {
       expect(res.status).toBe(401);
     })
   });
-
+  
   describe('confirm email', () => {
     let confirmationToken, fakeTenant;
     const baseUrl = '/api/auth/signup';

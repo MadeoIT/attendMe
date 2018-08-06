@@ -1,5 +1,13 @@
 const jwt = require('jsonwebtoken');
 
+const createCookie = (res, name, data, maxAge) => {
+  res.cookie(name, data, { 
+    maxAge: maxAge, 
+    httpOnly: true,
+    secure: true
+  });
+};
+
 const makePayload = (user, csrfToken) => {
   return {
     sub: user.id,
@@ -17,17 +25,8 @@ const createToken = (payload, tokenKey, expiration) => {
   return jwt.sign(payload, tokenKey, options);
 };
 
-const verifyToken = (token, key) => {
-  try {
-    return jwt.verify(token, key);
-  } catch (error) {
-    return false;
-  }
-}
-
-
 module.exports = {
-  verifyToken,
   createToken,
-  makePayload
+  makePayload,
+  createCookie
 }

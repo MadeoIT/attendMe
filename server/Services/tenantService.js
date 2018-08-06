@@ -1,6 +1,5 @@
 const Joi = require('joi');
 const config = require('config');
-
 const tenantDAO = require('../DAOs/tenantDAO');
 const { changeObjectKeyValue } = require('../factory');
 const { tenantSchema } = require('../models/validationModels/tenantValidation');
@@ -14,26 +13,34 @@ const { comparePassword, generateSalt, hashPassword } = require('../middleware/e
  * Those object can be used to update or persist
  */
 const tenantObjects = {
-  password: async (tenant) => {
+  getPasswordObj: async (tenant) => {
     const salt = await generateSalt(saltRounds);
     const hashedPassword = await hashPassword(tenant.password, salt);
     return changeObjectKeyValue(tenant, 'password', hashedPassword);
   },
-  google: async (tenant) => {
+  getGoogleObj: async (tenant) => {
     return { 
       password: '',
       googleId: tenant.id,
       email: tenant.email
     }
   },
-  confirmed: async () => {
+  getConfirmedObj: async () => {
     return { confirmed: true }
-  }
+  },
+  getTenantObj: async (tenant) => tenant
 };
 
-//Validate tenant object check if tenant email already exist and then persist
-const saveTenant = async (tenant) => {
-  const result = Joi.validate(tenant, tenantSchema);
+/**
+ * Persist Tenant into the database
+ * @param {Object} tenant 
+ * @param {Function} getObject 
+ * Create the tenant object, validate the tenant object, 
+ * check if tenant already exist, persist the tenant
+ */
+const saveTenant = async (tenant, getObject) => {
+  const tenantObj = await getObject(tenant);
+  const result = Joi.validate(tenantObj, tenantSchema);
 
   if(result.error) {
     return { 
@@ -51,11 +58,12 @@ const saveTenant = async (tenant) => {
     }
   }
 
-  return await tenantDAO.createTenant(tenant);
+  return await tenantDAO.createTenant(tenantObj);
 };
 
-const updateTenant = async (tenant, id) => {
-  const result = await tenantDAO.updateTenantById(tenant, id);
+const updateTenant = async (tenant, getObject, id) => {
+  const tenantObj = await getObject(tenant);
+  const result = await tenantDAO.updateTenantById(tenantObj, id);
   return result[1][0]; //Postgre returning object
 };
 

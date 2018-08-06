@@ -7,23 +7,14 @@ const tokenKey = config.get('encryption.jwtSk');
 const refreshTokenKey = config.get('encryption.jwtRefreshSk');
 const tokenExp = config.get('encryption.tokenExp');
 const refreshTokenExp = config.get('encryption.refreshTokenExp');
-const { createToken, makePayload } = require('../middleware/token');
+const { createToken, makePayload, createCookie } = require('../middleware/token');
 const COOKIE_MAX_AGE = 14 * 24 * 60 * 60 * 1000; //Two weeks
-
-const createCookie = (res, name, token) => {
-  res.cookie(name, token, { 
-    maxAge: COOKIE_MAX_AGE, 
-    httpOnly: true,
-    secure: true
-  });
-};
 
 const resetPassowrd = async (req, res, next) => {
   try {
     const { user } = req;
 
-    const tenantObj = tenantObjects.password(user);
-    const tenant = await updateTenant(tenantObj, user.id);
+    const tenant = await updateTenant(user, tenantObjects.getPasswordObj, user.id);
     
     const message = messages.resetPasswordConfirmation(tenant);
     await sendNotification('email')(message);
@@ -42,7 +33,7 @@ const mailPasswordReset = async (req, res, next) => {
     const message = messages.resetPassword(user)
     await sendNotification('email')(message);
     
-    res.status(200).send(req.user);
+    res.status(200).send(user);
 
   } catch (error) {
     next(error);
@@ -52,15 +43,15 @@ const mailPasswordReset = async (req, res, next) => {
 const signup = async (req, res, next) => {
   try {
     const { body } = req;
-    const tenantObj = await tenantObjects.password(body);
-    const tenant = await saveTenant(tenantObj);
+    const tenant = await saveTenant(body, tenantObjects.getPasswordObj);
 
     if(!tenant.result && tenant.message) {
       return res.status(400).send(tenant.message);
     };
 
-    const message = messages.confirmation(tenant)
+    const message = messages.confirmation(tenant);
     await sendNotification('email')(message);
+
     res.status(200).send(tenant);
 
   } catch (error) {
@@ -72,11 +63,11 @@ const confirmAccount = async (req, res, next) => {
   try {
     const { user } = req;
 
-    const tenantObj = tenantObjects.confirmed();
-    const tenant = await updateTenant(tenantObj, user.id);
+    const tenant = await updateTenant(user, tenantObjects.getConfirmedObj, user.id);
 
     const message = messages.welcome(tenant)
     await sendNotification('email')(message);
+
     res.status(200).send(tenant);
 
   } catch (error) {
@@ -91,8 +82,8 @@ const sendTokenAndRefreshToken = (req, res) => {
   const token = createToken(payload, tokenKey, tokenExp);
   const refreshToken = createToken(payload, refreshTokenKey, refreshTokenExp);
   
-  createCookie(res, 'token', token);
-  createCookie(res, 'refresh-token', refreshToken);
+  createCookie(res, 'token', token, COOKIE_MAX_AGE);
+  createCookie(res, 'refresh-token', refreshToken, COOKIE_MAX_AGE);
 
   res.status(200).send({csrfToken});
 };
@@ -102,7 +93,7 @@ const sendToken = (req, res) => {
   const payload = makePayload(user);
   const token = createToken(payload, tokenKey, tokenExp);
 
-  createCookie(res, 'token', token)
+  createCookie(res, 'token', token, COOKIE_MAX_AGE);
 
   res.status(200).send({});
 };

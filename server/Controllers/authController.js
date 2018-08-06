@@ -1,10 +1,7 @@
 const router = require('express').Router();
 const { isValid, googleScope } = require('../middleware/auth');
-const { middlewareComposer, endMiddleware } = require('../factory');
-const { sendNotification } = require('../Services/notificationService');
-const { sendTokenAndRefreshToken, sendToken } = require('../Services/authService');
-const { saveTenant, updateTenant } = require('../Services/tenantService');
 const authService = require('../Services/authService');
+const { geolocationService } = require('../Services/geoLocationService');
 
 //Sign up a new tenant and send verification email
 router.post('/signup', authService.signup);
@@ -13,7 +10,7 @@ router.post('/signup', authService.signup);
 router.get('/signup/:tokenId', isValid('jwt-confirm'), authService.confirmAccount);
 
 //login and give back a token
-router.post('/login', isValid('local'), authService.sendTokenAndRefreshToken);
+router.post('/login', isValid('local'), geolocationService, authService.sendTokenAndRefreshToken);
 
 //Check is the refresh token is valid and give back a new token
 router.post('/relogin', isValid('jwt-refresh'), authService.sendToken);

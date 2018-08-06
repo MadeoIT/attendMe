@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
   Tenant.associate = (models) => {
     Tenant.hasMany(models.Todo, {
       foreignKey: 'tenantId'
-    })
+    });
   };
   return Tenant;
 };

@@ -1,7 +1,8 @@
-const { checkTenantCredential, saveTenant} = require('../../Services/tenantService');
+const { 
+  checkTenantCredential, saveTenant, tenantObjects, updateTenant
+} = require('../../Services/tenantService');
 const { generateTenant, generateFakeTenantObj } = require('../sharedBehaviours');
 const db = require('../../models');
-const bcrypt = require('bcryptjs');
 
 describe('Tenant', () => {
 
@@ -11,13 +12,13 @@ describe('Tenant', () => {
     })
   });
 
-  describe('validate tenant', () => {
+  describe('Check tenant credential', () => {
     let done;
     const fakeTenant1 = generateFakeTenantObj();
     const fakeTenant2 = generateFakeTenantObj();
 
     beforeEach(async () => {
-      done = (_, res) => res;
+      done = (_, res) => res; //Mock the done function from passport
 
       await Promise.all([
         generateTenant(fakeTenant1),
@@ -44,36 +45,58 @@ describe('Tenant', () => {
       expect(result).toBeFalsy();
     });
   });
+
   describe('save tenant', () => {
     const fakeTenant = generateFakeTenantObj();
 
     it('should save a tenant', async() => {
-      const tenant = await saveTenant(fakeTenant);
+      const tenant = await saveTenant(fakeTenant, tenantObjects.getPasswordObj);
 
       expect(tenant).toBeDefined();
       expect(tenant.email).toBe(fakeTenant.email);
       expect(tenant.id).toBeDefined();
     });
-  })
-  //TODO: update test for update and save
-  describe.skip('reset tenant password', () => {
-    let fakeTenant, tenant, payload
-    const PASSWORD = 'newPassword'
-    const req = { body: {password: PASSWORD}};
-    const done = (error, res) => res;
 
-    beforeEach(async () => {
-      fakeTenant = generateFakeTenantObj();
-      tenant = await generateTenant(fakeTenant);
-      payload = { sub: tenant.id };
+    it('should not save a tenant / email already exist', async() => {
+      const tenant = await generateTenant(fakeTenant);
+      delete tenant.confirmed;
+      const response = await saveTenant(fakeTenant, tenantObjects.getPasswordObj);
+
+      expect(response.result).toBeFalsy();
+      expect(response.message).toBe('Email already exist');
     });
 
-    it('should reset the password', async () => {
-      const res = await resetTenantPassword(req, payload, done);
-      const passwordRes = bcrypt.compare(PASSWORD, res.password);
+    it('should not save a tenant / forbidden property', async() => {
+      fakeTenant.confirmed = true;
+      const response = await saveTenant(fakeTenant, tenantObjects.getPasswordObj);
+    
+      expect(response.result).toBeFalsy();
+      expect(response.message).toBe('\"confirmed\" is not allowed');
+    });
+  });
 
-      expect(res.password).toBeDefined();
-      expect(passwordRes).toBeTruthy();
-    })
-  })
-})
+  describe('Tenant object', () => {
+    it('should return a tenant object with the hashed password', async() => {
+      const tenantObj = generateFakeTenantObj();
+      const tenantObjWithHashedPass = await tenantObjects.getPasswordObj(tenantObj);
+
+      expect(tenantObjWithHashedPass.password).toBeDefined();
+      expect(tenantObjWithHashedPass.password).not.toBe(tenantObj.password);
+      expect(Object.keys(tenantObjWithHashedPass).length).toBe(2);
+    });
+
+    //TODO: google etc...
+  });
+
+  describe('Update tenant', () => {
+    it('should update a tenant', async() => {
+      const fakeTenant = generateFakeTenantObj();
+      const tenant = await generateTenant(fakeTenant);
+      fakeTenant.fullName = 'Matteo Gioioso';
+      const updatedTenant = await updateTenant(fakeTenant, tenantObjects.getTenantObj, tenant.id);
+
+      expect(updatedTenant.fullName).toBe('Matteo Gioioso');
+      expect(updatedTenant.id).toBe(tenant.id);
+    });
+  });
+});
