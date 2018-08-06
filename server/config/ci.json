@@ -8,6 +8,9 @@
     "refreshTokenExp": "7d",
     "confirmationTokenExp":  "5m"
   },
+  "emailService": {
+    "EMAIL_USER": "rjjaorzpkskqbkm7 @ethereal.email"
+  },
   "googleAuth": {
     "callbackURL": "/api/auth/google/callback"
   },
