@@ -15,6 +15,8 @@
     "EMAIL_PORT": 587
   },
   "googleAuth": {
+    "clientID": "123",
+    "clientSecret": "456",
     "callbackURL": "/api/auth/google/callback"
   },
   "origin": "http://localhost:8080"

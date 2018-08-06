@@ -30,7 +30,7 @@ if (process.env.NODE_ENV === 'production') {
 
 };
 
-if (process.env.NODE_ENV === 'test' && process.env.NODE_ENV === 'ci') {
+if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'ci') {
   logger.add(new winston.transports.Console({
     format: alignedWithColorsAndTime
   }));

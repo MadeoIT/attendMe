@@ -7,7 +7,7 @@ services:
 before_script:
   - psql -c 'create database database_test;' -U postgres
   - npm install -g sequelize-cli
-  - sequelize db:migrate
+  - NODE_ENV=ci sequelize db:migrate
 env: 
   - NODE_ENV=ci
 cache: yarn

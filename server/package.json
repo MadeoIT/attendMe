@@ -38,7 +38,7 @@
   },
   "scripts": {
     "test": "cross-env NODE_ENV=test jest --watchAll --maxWorkers=1",
-    "test-ci": "jest --maxWorkers=1",
+    "test-ci": "jest --maxWorkers=1 --detectOpenHandles --forceExit",
     "start": "cross-env NODE_ENV=development nodemon app.js"
   }
 }

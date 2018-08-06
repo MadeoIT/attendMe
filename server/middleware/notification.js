@@ -42,6 +42,8 @@ const getMailService = (environment) => {
       return sendEmailNodemailer;
     case 'development':
       return sendEmailNodemailer;
+    case 'ci':
+      return sendEmailNodemailer;
     case 'production':
       return
     default:
