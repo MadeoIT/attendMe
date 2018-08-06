@@ -1,12 +1,4 @@
 {
-  "db": {
-    "username": "postgres",
-    "password": null,
-    "database": "database_test",
-    "host": "127.0.0.1",
-    "dialect": "postgres",
-    "operatorsAliases": false
-  },
   "encryption": {
     "saltRounds": 10,
     "jwtSk": "$SN!M1z}b%T08b+i3$G3l@b$NAH0O}1H2E;1D&o{r(yNICDWbe4Tl`S(zxp.b*9",

@@ -1,0 +1,15 @@
+{
+  "encryption": {
+    "saltRounds": 10,
+    "jwtSk": "123secretkey",
+    "jwtRefreshSk": "456secretkey",
+    "jwtConfirmationSk": "789secretkey",
+    "tokenExp": "15m",
+    "refreshTokenExp": "7d",
+    "confirmationTokenExp":  "5m"
+  },
+  "googleAuth": {
+    "callbackURL": "/api/auth/google/callback"
+  },
+  "origin": "http://localhost:8080"
+}

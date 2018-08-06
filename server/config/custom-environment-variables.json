@@ -1,0 +1,12 @@
+{
+  "googleAuth": {
+    "clientID": "GOOGLE_CLIENT_ID",
+    "clientSecret": "GOOGLE_CLIENT_SECRET"
+  },
+  "emailService": {
+    "EMAIL_HOST": "EMAIL_HOST",
+    "EMAIL_USER": "EMAIL_USER",
+    "EMAIL_PASS": "EMAIL_PASS",
+    "EMAIL_PORT": "EMAIL_PORT"
+  }
+}
