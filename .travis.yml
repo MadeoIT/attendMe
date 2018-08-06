@@ -6,6 +6,7 @@ services:
   - postgresql
 before_script:
   - psql -c 'create database database_test;' -U postgres
+  - sequelize db:migrate
 env: 
   - NODE_ENV=test
 cache: yarn
