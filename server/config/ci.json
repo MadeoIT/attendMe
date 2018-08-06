@@ -9,7 +9,10 @@
     "confirmationTokenExp":  "5m"
   },
   "emailService": {
-    "EMAIL_USER": "rjjaorzpkskqbkm7 @ethereal.email"
+    "EMAIL_HOST": "smtp.ethereal.email",
+    "EMAIL_USER": "rjjaorzpkskqbkm7 @ethereal.email",
+    "EMAIL_PASS": "z8HrEYM5n5DkPxXaKE",
+    "EMAIL_PORT": 587
   },
   "googleAuth": {
     "callbackURL": "/api/auth/google/callback"
