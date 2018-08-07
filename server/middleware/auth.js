@@ -55,9 +55,7 @@ const jwtAuth = new JwtStrategy(jwtOption, async(req, payload, done) => {
   const csrfToken = req.headers['authorization'];
   if(csrfToken !== payload.csrfToken) return done(null, false); //verify csrf token
 
-  const newPayload = changeObjectKeyName(payload, 'sub', 'id');
-
-  return done(null, newPayload);
+  return done(null, payload);
 });
 
 const options = {
@@ -82,7 +80,7 @@ const options = {
  */
 const jwtOptionalStrategyBuilder = (strategyType) => {
   return new JwtStrategy(options[strategyType], async(_, payload, done) => {
-    const email = payload.name;
+    const { email } = payload;
     await getTenantByEmail(email, done);
   });
 };

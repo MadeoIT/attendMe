@@ -1,12 +1,42 @@
 [![Build Status](https://travis-ci.org/MadeoIT/NotAnotherTodo_ReactNodeJs.svg?branch=master)](https://travis-ci.org/MadeoIT/NotAnotherTodo_ReactNodeJs)
+[![Coverage Status](https://coveralls.io/repos/github/MadeoIT/NotAnotherTodo_ReactNodeJs/badge.svg?branch=master)](https://coveralls.io/github/MadeoIT/NotAnotherTodo_ReactNodeJs?branch=master)
 
-# Project Title
+# NOT ANOTHER TODO
 
-Under construction
+This is not a normal todo, but is a wrapper around it and it includes the following features:
+* Multitenancy shared database architecture with JWT data separation for each query.
+* Local authentication, google authentication.
+* Account email confirmation and passoword rest email.
+* Geolocation for log in and email alert
+* Block account option
+* Rate limiter
+* JWT token, refresh token and csrf token
+* Two factor authentication
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+### Development
+Create a config.json and copy the following code, this is the config for sequelize
+```
+{
+  "development": {
+    "username": "postgres",
+    "password": null,
+    "database": "todoTenant",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "operatorsAliases": false
+  }
+}
+```
+
+Then run
+```
+npm install sequelize 
+```
+
+* yarn
+* yarn run
 
 ### Prerequisites
 
@@ -36,22 +66,8 @@ End with an example of getting some data out of the system or using it for a lit
 
 ## Running the tests
 
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
 ```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
+yarn test
 ```
 
 ## Deployment
@@ -60,30 +76,15 @@ Add additional notes about how to deploy this on a live system
 
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+* React and Redux - Client framework and state management library
+* Expressjs - The web framework used
+* Sequelize - ORM
+* PostgreSQL - Database
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+* **Matteo Gioioso** 
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc

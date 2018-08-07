@@ -1,35 +1,7 @@
 const Joi = require('joi');
-const config = require('config');
 const tenantDAO = require('../DAOs/tenantDAO');
-const { changeObjectKeyValue } = require('../factory');
 const { tenantSchema } = require('../models/validationModels/tenantValidation');
-const saltRounds = config.get('encryption.saltRounds');
-const { comparePassword, generateSalt, hashPassword } = require('../middleware/encryption');
-
-/**
- * Object that contains method to output tenant object
- * @param {Object} tenant
- * @returns {Object} tenant object
- * Those object can be used to update or persist
- */
-const tenantObjects = {
-  getPasswordObj: async (tenant) => {
-    const salt = await generateSalt(saltRounds);
-    const hashedPassword = await hashPassword(tenant.password, salt);
-    return changeObjectKeyValue(tenant, 'password', hashedPassword);
-  },
-  getGoogleObj: async (tenant) => {
-    return { 
-      password: '',
-      googleId: tenant.id,
-      email: tenant.email
-    }
-  },
-  getConfirmedObj: async () => {
-    return { confirmed: true }
-  },
-  getTenantObj: async (tenant) => tenant
-};
+const { comparePassword } = require('../middleware/encryption');
 
 /**
  * Persist Tenant into the database
@@ -38,10 +10,9 @@ const tenantObjects = {
  * Create the tenant object, validate the tenant object, 
  * check if tenant already exist, persist the tenant
  */
-const saveTenant = async (tenant, getObject) => {
-  const tenantObj = await getObject(tenant);
-  const result = Joi.validate(tenantObj, tenantSchema);
-
+const saveTenant = async (tenant) => {
+  const result = Joi.validate(tenant, tenantSchema);
+  
   if(result.error) {
     return { 
       result: false, 
@@ -58,12 +29,11 @@ const saveTenant = async (tenant, getObject) => {
     }
   }
 
-  return await tenantDAO.createTenant(tenantObj);
+  return await tenantDAO.createTenant(tenant);
 };
 
-const updateTenant = async (tenant, getObject, id) => {
-  const tenantObj = await getObject(tenant);
-  const result = await tenantDAO.updateTenantById(tenantObj, id);
+const updateTenant = async (tenant, id) => {
+  const result = await tenantDAO.updateTenantById(tenant, id);
   return result[1][0]; //Postgre returning object
 };
 
@@ -115,6 +85,5 @@ module.exports = {
   saveTenant,
   checkTenantCredential,
   getTenantByEmail,
-  updateTenant,
-  tenantObjects
+  updateTenant
 }

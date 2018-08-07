@@ -1,12 +1,11 @@
+const R = require('ramda');
 const { createCookie } = require('../middleware/token');
-const { sendNotification } = require('../Services/notificationService');
-const messages = require('../middleware/messages');
+const { sendNotification } = require('../middleware/notification');
+const { createEmailMessage, htmlGeolocationMismatch } = require('../middleware/messages');
 const COOCKIE_MAX_AGE = 14 * 24 * 60 * 60 * 1000; 
 const SAMPLE_DISTANCE = 100; //km
 
-const degToRad = (degree) => {
-  return degree * (Math.PI / 180)
-};
+const degToRad = (degree) => degree * (Math.PI / 180);
 
 /**
  * Harvesine formula
@@ -35,15 +34,13 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
  * @param {String} coordinates 
  * @returns {Array<Number>}
  */
-const getCoordinatesFromLocation = (location) => {
-  return location
-    .split(',')
-    .map(coordinate => Number(coordinate));
-};
+const convertLocationToCoordinates = (location) => 
+  location.split(',').map(coordinate => Number(coordinate));
 
 /**
  * Extract the location from the cookie and the header
  * @param {Object} req object from the request 
+ * @returns {Array} array of locations
  * If the location was not provided it will return 
  * an arbitrary string value of '0,0'. This means the notification
  * will not be sent.
@@ -54,41 +51,43 @@ const getLocationFromRequest = (req) => {
     !req.cookies['last-location'] ||
     !req.headers ||
     !req.headers['current-location']
-  ) return {
-    lastLocation: '0,0',
-    currentLocation: '0,0'
-  };
+  ) return ['0,0', '0,0'];
   
-  return {
-    lastLocation: req.cookies['last-location'],
-    currentLocation: req.headers['current-location']
-  };
-};
-
-const sendNotificationIfDistanceIsExceeded = async (distance, user) => {
-  if(distance <= SAMPLE_DISTANCE) return distance; 
-
-  const message = messages.geolocationMismatch(user);
-  return await sendNotification('email')(message);
+  return [
+    req.cookies['last-location'],
+    req.headers['current-location']
+  ]
 };
 
 /**
  * Calculate distance between location and send a notification if the distance
  * exceed the minimum distance
  * @param {Object} req request body
- * The geolocation of the request is going to be on the header.
- * The geolocation of the previous request is going to be in the cookie.
  */
 const geolocationService = async (req, res, next) => {
   try {
     const { user } = req;
-    const { lastLocation, currentLocation } = getLocationFromRequest(req);
-    const coordinatesLastLocation = getCoordinatesFromLocation(lastLocation);
-    const coordinatesCurrentLocation = getCoordinatesFromLocation(currentLocation);
-    const distance = calculateDistance(...coordinatesLastLocation, ...coordinatesCurrentLocation);
+    const currentLocation = getLocationFromRequest(req)[1];
+   
+    const distance = calculateDistance(
+      ...R.concat(
+        ...R.map(
+          convertLocationToCoordinates, 
+          getLocationFromRequest(req)
+        )
+      )
+    );
     
-    await sendNotificationIfDistanceIsExceeded(distance, user);
-  
+    if(distance <= SAMPLE_DISTANCE) return next();
+    
+    const message = createEmailMessage(
+      'account-activity@todo.com', 
+      user.email, 
+      'Recent log in',  
+      htmlGeolocationMismatch(user)
+    );
+
+    await sendNotification('email')(message);
     createCookie(res, 'last-location', currentLocation, COOCKIE_MAX_AGE);
     next();
 
@@ -97,10 +96,10 @@ const geolocationService = async (req, res, next) => {
   }
 };
 
+
 module.exports = {
   geolocationService,
   getLocationFromRequest,
-  getCoordinatesFromLocation,
-  sendNotificationIfDistanceIsExceeded,
+  convertLocationToCoordinates,
   calculateDistance
 }

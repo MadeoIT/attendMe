@@ -1,5 +1,5 @@
 const db = require('../models');
-const { makePayload, createToken } = require('../middleware/token');
+const { createPayload, createToken } = require('../middleware/token');
 const config = require('config');
 const { generateSalt, hashPassword } = require('../middleware/encryption');
 const faker = require('faker');
@@ -14,12 +14,12 @@ const tokenExp = config.get('encryption.tokenExp');
 const refreshTokenExp = config.get('encryption.refreshTokenExp');
 const confirmationTokenExp = config.get('encryption.confirmationTokenExp');
 
-const saltRounds = config.get('encryption.saltRounds');
 
 exports.generateTokenAndCsrfToken = function (tenant) {
   const csrfToken = uuidv4();
-  const payload = makePayload(tenant, csrfToken);
+  const payload = createPayload(tenant, csrfToken);
   const token = createToken(payload, tokenKey, tokenExp);
+
   return {
     csrfToken, token
   }
@@ -27,20 +27,21 @@ exports.generateTokenAndCsrfToken = function (tenant) {
 
 exports.generateRefreshTokenAndCsrfToken = function (tenant) {
   const csrfToken = uuidv4();
-  const payload = makePayload(tenant, csrfToken);
+  const payload = createPayload(tenant, csrfToken);
   const refreshToken = createToken(payload, refreshTokenKey, refreshTokenExp);
+  
   return {
     csrfToken, refreshToken
   }
 };
 
 exports.generateConfirmationToken = function (tenant) {
-  const payload = makePayload(tenant);
+  const payload = createPayload(tenant, '');
   return createToken(payload, confirmationTokenKey, confirmationTokenExp);
 }
 
 exports.generateTenant = async function (tenantObj) {
-  const salt = await generateSalt(saltRounds);
+  const salt = await generateSalt();
   const hashedPassword = await hashPassword(tenantObj.password, salt);
   return db.Tenant.create({
     email: tenantObj.email,

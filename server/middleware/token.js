@@ -1,3 +1,4 @@
+const R = require('ramda');
 const jwt = require('jsonwebtoken');
 
 const createCookie = (res, name, data, maxAge) => {
@@ -8,25 +9,29 @@ const createCookie = (res, name, data, maxAge) => {
   });
 };
 
-const makePayload = (user, csrfToken) => {
-  return {
-    sub: user.id,
-    googleId: user.googleId,
-    name: user.email,
-    iat: Date.now(),
-    csrfToken
-  };
-};
+const createPayload = R.curry(
+  (user, csrfToken) => {
+    return {
+      id: user.id,
+      googleId: user.googleId,
+      email: user.email,
+      iat: Date.now(),
+      csrfToken
+    };
+  }
+);
 
-const createToken = (payload, tokenKey, expiration) => {
-  const options = {
-    expiresIn: expiration
-  };
-  return jwt.sign(payload, tokenKey, options);
-};
+const createToken = R.curry(
+  (payload, tokenKey, expiration) => {
+    const options = {
+      expiresIn: expiration
+    };
+    return jwt.sign(payload, tokenKey, options);
+  }
+);
 
 module.exports = {
   createToken,
-  makePayload,
+  createPayload,
   createCookie
 }

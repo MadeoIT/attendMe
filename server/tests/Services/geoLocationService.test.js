@@ -1,5 +1,5 @@
 const { 
-  getLocationFromRequest, sendNotificationIfDistanceIsExceeded, getCoordinatesFromLocation, calculateDistance
+  getLocationFromRequest, convertLocationToCoordinates, calculateDistance
 } = require('../../Services/geoLocationService');
 const { generateFakeTenantObj } = require('../sharedBehaviours');
 
@@ -12,17 +12,26 @@ describe('geo location service', () => {
   const distance = 327; //km approximately
 
   it('should return an array of coordinates', () => {
-    const arrayCoordinates = getCoordinatesFromLocation('51.9,4.5');
+    const arrayCoordinates = convertLocationToCoordinates('51.9,4.5');
 
     expect(arrayCoordinates.length).toBe(2);
     expect(arrayCoordinates).toEqual(expect.arrayContaining([4.5, 51.9]));
   });
 
-  it('should return a distance in Km', () => {
-    const result = calculateDistance(...point1, ...point2);
-
-    expect(Math.floor(result)).toBeCloseTo(distance);
+  describe('Harvesine formula', () => {
+    it('should return a distance of 0', () => {
+      const result = calculateDistance(...[0, 0], ...[0, 0]);
+  
+      expect(Math.floor(result)).toBeCloseTo(0);
+    });
+  
+    it('should return a distance in Km', () => {
+      const result = calculateDistance(...point1, ...point2);
+  
+      expect(Math.floor(result)).toBeCloseTo(distance);
+    });
   });
+  
 
   describe('Get location from request body', () => {
     it('should get 2 strings or coordinates', () => {
@@ -39,8 +48,9 @@ describe('geo location service', () => {
       };
       const result = getLocationFromRequest(req);
 
-      expect(Object.keys(result).length).toBe(2);
-      expect(result.lastLocation).toBe('51.9,4.5');
+      expect(result.length).toBe(2);
+      expect(result[0]).toBe('51.9,4.5');
+      expect(result[1]).toBe('52.5,-0.2');
     });
 
     it('should get "0,0" because location has not been provided', () => {
@@ -56,23 +66,33 @@ describe('geo location service', () => {
       const result = getLocationFromRequest(req);
 
       expect(Object.keys(result).length).toBe(2);
-      expect(result.lastLocation).toBe('0,0');
-      expect(result.currentLocation).toBe('0,0');
+      expect(result[0]).toBe('0,0');
+      expect(result[1]).toBe('0,0');
     });
   });
 
-  describe('Send notification', () => {
-
-    it('should send a notification / distance exceeded',  async () => {
-      const response = await sendNotificationIfDistanceIsExceeded(distance, generateFakeTenantObj());
-
-      expect(Object.keys(response)).toContain('accepted');
-    });
-
-    it('should not send a notification / distance does not exceed', async () => {
-      const response = await sendNotificationIfDistanceIsExceeded(90, generateFakeTenantObj());
-
-      expect(response).toBe(90);
-    })
+  it.only('composite function to calculate distance', () => {
+    const R = require('ramda');
+    const req = {
+      cookies: {
+        'last-location': '51.9,4.5'
+      },
+      headers: {
+        'current-location': '52.5,-0.2'
+      },
+      user: {
+        ...generateFakeTenantObj()
+      }
+    };
+    const result = calculateDistance(
+      ...R.concat(
+        ...R.map(
+          convertLocationToCoordinates, 
+          getLocationFromRequest(req)
+        )
+      )
+    )
+  
+    expect(Math.floor(result)).toBeCloseTo(distance);
   })
 })

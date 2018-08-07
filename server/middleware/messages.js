@@ -1,66 +1,47 @@
 const config = require('config');
-const { makePayload, createToken } = require('../middleware/token');
-const confirmationTokenExp = config.get('encryption.confirmationTokenExp');
-const confirmationTokenKey = config.get('encryption.jwtConfirmationSk');
 const origin = config.get('origin');
-const { createEmailMessage } = require('../middleware/notification')
 
-/**
- * Cretate an array with all the property to build the email message
- * @param {Object} user object with id and email
- * @returns {Massage} returns an array with the necessary
- * arguments to build the email message
- */
-const messages = {
-
-  confirmation: (tenant) => {
-    const payload = makePayload(tenant);
-    const confirmationToken = createToken(payload, confirmationTokenKey, confirmationTokenExp);
-    const html = 
-      `<h1>Please click on the link to confirm your email</h1>
-        <a href="${origin}/api/auth/confirm/${confirmationToken}">Confirm your email</a>`;
-
-    return createEmailMessage('confimation@todo.com', tenant.email, 'Confirmation email',  html);
-  },
-
-  welcome: (tenant) => {
-    const html = 
-      `<h1>Welcome to the app ${tenant.email}, your email is now verify!</h1>`;
-    return createEmailMessage('confirmation@todo.com', tenant.email, 'Welcome',  html);
-  },
-
-  resetPassword: (tenant) => {
-    const payload = makePayload(tenant);
-    const resetToken = createToken(payload, confirmationTokenKey, confirmationTokenExp);
-    
-    const html = 
-    `<h1>Please click on the link to reset your password</h1>
-      <a href="${origin}/api/auth/password/${resetToken}">reset your password</a></br>
-      <p>If you did not perform such operation and you suspect someone else is trying to login with
-      your account click on the link below to lock your account</p>`;
-
-    return createEmailMessage('resetPassword@todo.com', tenant.email, 'Reset Password',  html);
-  },
-
-  resetPasswordConfirmation: (tenant) => {
-    const html = 
-    `<h1>Hello ${tenant.email}</h1></br>
-      <h2>Your password has been reset</h2>
-      <p>If you did not perform such operation click the link below to block your account
-      and contact us!</p>`;
-
-    return createEmailMessage('resetPassword@todo.com', tenant.email, 'Reset password successful',  html);
-  },
-
-  geolocationMismatch: (tenant) => {
-    const html = 
-    `<h1>Hello ${tenant.email}</h1></br>
-      <h2>You have recently logged in another location</h2>
-      <p>If you did not recognize this activity you should reset your password</p>`;
-
-    return createEmailMessage('account-activity@todo.com', tenant.email, 'Recent log in',  html);
-  }
-  
+const createTokenizedUrl = (token) => (partialUrl) => {
+  return `${origin}/api/${partialUrl}/${token}`
 };
 
-module.exports = messages;
+const createEmailMessage = (from, to, subject, html) => {
+  return {
+    from, to, subject, html
+  }
+};
+
+const htmlConfirmEmail = (url) =>
+  `<h1>Please click on the link to confirm your email</h1>
+  <a href="${url}">Confirm your email</a>`
+
+const htmlGeolocationMismatch = (tenant) => 
+  `<h1>Hello ${tenant.email}</h1></br>
+  <h2>You have recently logged in another location</h2>
+  <p>If you did not recognize this activity you should reset your password</p>`
+
+const htmlResetPassword = (url) => 
+  `<h1>Please click on the link to reset your password</h1>
+  <a href="${url}">reset your password</a></br>
+  <p>If you did not perform such operation and you suspect someone else is trying to login with
+  your account click on the link below to lock your account</p>`;
+
+const htmlResetPasswordConfirm = (tenant) => 
+  `<h1>Hello ${tenant.email}</h1></br>
+  <h2>Your password has been reset</h2>
+  <p>If you did not perform such operation click the link below to block your account
+  and contact us!</p>`;
+
+const htmlWelcome = (tenant) =>
+  `<h1>Hello ${tenant.email}</h1></br>
+  <h2>Congratulation your email has been verified</h2>`
+
+module.exports = {
+  htmlGeolocationMismatch,
+  htmlResetPassword,
+  htmlResetPasswordConfirm,
+  htmlConfirmEmail,
+  htmlWelcome,
+  createEmailMessage,
+  createTokenizedUrl
+};

@@ -19,15 +19,6 @@ const sendEmailNodemailer = (message) => {
   return transport.sendMail(message);
 };
 
-const createEmailMessage = (from, to, subject, html) => {
-  return {
-    from,
-    to,
-    subject,
-    html,
-  }
-};
-
 /**
  * Depending on the enviroment variable return the email service
  * Ex: if the env is 'production' you would like to send email
@@ -39,21 +30,33 @@ const createEmailMessage = (from, to, subject, html) => {
 const getMailService = (environment) => {
   switch (environment) {
     case 'test':
-      return sendEmailNodemailer;
     case 'development':
-      return sendEmailNodemailer;
     case 'ci':
       return sendEmailNodemailer;
     case 'production':
-      return
-    default:
-      sendEmailNodemailer;
-      return
+      return;
   }
 };
-const sendEmail = getMailService(process.env.NODE_ENV);
+
+const getSMSservice = (environment) =>  {
+
+};
+
+/**
+ * Send an email to the user upon chosing a type of message
+ * @param {String} typeOfNotification the type of message you want to send
+ * @returns {void} it simply terminate the request by sendind the email
+ * The type of message should be injected in the controller
+ */
+const sendNotification = (notificationType) => (message) => {
+  const notificationServices = {
+    email: getMailService(process.env.NODE_ENV),
+    sms: getSMSservice(process.env.NODE_ENV)
+  };
+  return notificationServices[notificationType](message);
+}
 
 module.exports = {
-  sendEmail,
-  createEmailMessage
+  sendNotification,
+  getMailService,
 }

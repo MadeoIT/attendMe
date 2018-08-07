@@ -1,7 +1,8 @@
 const { 
-  checkTenantCredential, saveTenant, tenantObjects, updateTenant
+  checkTenantCredential, saveTenant, updateTenant
 } = require('../../Services/tenantService');
 const { generateTenant, generateFakeTenantObj } = require('../sharedBehaviours');
+const { generateSalt, hashPassword } = require('../../middleware/encryption');
 const db = require('../../models');
 
 describe('Tenant', () => {
@@ -50,7 +51,7 @@ describe('Tenant', () => {
     const fakeTenant = generateFakeTenantObj();
 
     it('should save a tenant', async() => {
-      const tenant = await saveTenant(fakeTenant, tenantObjects.getPasswordObj);
+      const tenant = await saveTenant(fakeTenant);
 
       expect(tenant).toBeDefined();
       expect(tenant.email).toBe(fakeTenant.email);
@@ -60,7 +61,7 @@ describe('Tenant', () => {
     it('should not save a tenant / email already exist', async() => {
       const tenant = await generateTenant(fakeTenant);
       delete tenant.confirmed;
-      const response = await saveTenant(fakeTenant, tenantObjects.getPasswordObj);
+      const response = await saveTenant(fakeTenant);
 
       expect(response.result).toBeFalsy();
       expect(response.message).toBe('Email already exist');
@@ -68,7 +69,7 @@ describe('Tenant', () => {
 
     it('should not save a tenant / forbidden property', async() => {
       fakeTenant.confirmed = true;
-      const response = await saveTenant(fakeTenant, tenantObjects.getPasswordObj);
+      const response = await saveTenant(fakeTenant);
     
       expect(response.result).toBeFalsy();
       expect(response.message).toBe('\"confirmed\" is not allowed');
@@ -78,8 +79,11 @@ describe('Tenant', () => {
   describe('Tenant object', () => {
     it('should return a tenant object with the hashed password', async() => {
       const tenantObj = generateFakeTenantObj();
-      const tenantObjWithHashedPass = await tenantObjects.getPasswordObj(tenantObj);
-
+      const salt = await generateSalt();
+      const hashedPassword = await hashPassword(tenantObj.password, salt);
+      const tenantObjWithHashedPass = {...tenantObj };
+      tenantObjWithHashedPass.password = hashedPassword;
+      
       expect(tenantObjWithHashedPass.password).toBeDefined();
       expect(tenantObjWithHashedPass.password).not.toBe(tenantObj.password);
       expect(Object.keys(tenantObjWithHashedPass).length).toBe(2);
@@ -93,7 +97,7 @@ describe('Tenant', () => {
       const fakeTenant = generateFakeTenantObj();
       const tenant = await generateTenant(fakeTenant);
       fakeTenant.fullName = 'Matteo Gioioso';
-      const updatedTenant = await updateTenant(fakeTenant, tenantObjects.getTenantObj, tenant.id);
+      const updatedTenant = await updateTenant(fakeTenant, tenant.id);
 
       expect(updatedTenant.fullName).toBe('Matteo Gioioso');
       expect(updatedTenant.id).toBe(tenant.id);
