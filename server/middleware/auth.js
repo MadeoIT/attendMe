@@ -52,7 +52,7 @@ const email = new LocalStrategy(localEmailOption, async(username, _, done) => {
 });
 
 const jwtAuth = new JwtStrategy(jwtOption, async(req, payload, done) => {
-  const csrfToken = req.headers['authorization'];
+  const csrfToken = req.headers['csrf-token'];
   if(csrfToken !== payload.csrfToken) return done(null, false); //verify csrf token
 
   return done(null, payload);

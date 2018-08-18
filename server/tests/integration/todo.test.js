@@ -43,7 +43,7 @@ describe('Todo integration test', () => {
     const res = await request(server)
       .post(baseUrl)
       .set('Cookie', `token=${token}`)
-      .set('Authorization', csrfToken)
+      .set('csrf-token', csrfToken)
       .send(fakeTodo);
 
     expect(res.status).toBe(200);
@@ -78,7 +78,7 @@ describe('Todo integration test', () => {
       const res = await request(server)
         .get(baseUrl)
         .set('Cookie', `token=${token}`)
-        .set('Authorization', csrfToken);
+        .set('csrf-token', csrfToken);
 
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(2);
@@ -88,7 +88,7 @@ describe('Todo integration test', () => {
       const res = await request(server)
         .get(`${baseUrl}/${todoId}`)
         .set('Cookie', `token=${token}`)
-        .set('Authorization', csrfToken);
+        .set('csrf-token', csrfToken);
 
       expect(res.status).toBe(200);
       expect(res.body.content).toBe(fakeTodo2.content);
@@ -98,7 +98,7 @@ describe('Todo integration test', () => {
       const res = await request(server)
         .get(`${baseUrl}/4`)
         .set('Cookie', `token=${token}`)
-        .set('Authorization', csrfToken);
+        .set('csrf-token', csrfToken);
 
       expect(res.status).toBe(404);
     });
@@ -113,7 +113,7 @@ describe('Todo integration test', () => {
         .put(`${baseUrl}/${todoId}`)
         .send(todoUpdate)
         .set('Cookie', `token=${token}`)
-        .set('Authorization', csrfToken);
+        .set('csrf-token', csrfToken);
 
       expect(res.status).toBe(200);
       expect(res.body.content).toBe(fakeTodo2 + 'updated');
@@ -124,7 +124,7 @@ describe('Todo integration test', () => {
       const res = await request(server)
         .delete(`${baseUrl}/${todoId}`)
         .set('Cookie', `token=${token}`)
-        .set('Authorization', csrfToken);
+        .set('csrf-token', csrfToken);
 
       const remainingTodos = await db.Todo.findAll();
 
@@ -138,7 +138,7 @@ describe('Todo integration test', () => {
       const res = await request(server)
         .get(baseUrl)
         .set('Cookie', `token=${token}`)
-        .set('Authorization', 'wrongCsrfToken');
+        .set('csrf-token', 'wrongCsrfToken');
 
       expect(res.status).toBe(401);
     });

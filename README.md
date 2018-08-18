@@ -14,8 +14,8 @@ This is not a normal todo, but is a wrapper around it and it includes the follow
 * Two factor authentication
 
 ## Getting Started
-
-### Development
+Section in development
+<!-- ### Development
 Create a config.json and copy the following code, this is the config for sequelize
 ```
 {
@@ -73,7 +73,7 @@ yarn test
 ## Deployment
 
 Add additional notes about how to deploy this on a live system
-
+-->
 ## Built With
 
 * React and Redux - Client framework and state management library

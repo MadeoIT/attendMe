@@ -47,10 +47,8 @@ const convertLocationToCoordinates = (location) =>
  */
 const getLocationFromRequest = (req) => {
   if(
-    !req.cookies || 
-    !req.cookies['last-location'] ||
-    !req.headers ||
-    !req.headers['current-location']
+    !req.cookies || !req.cookies['last-location'] ||
+    !req.headers || !req.headers['current-location']
   ) return ['0,0', '0,0'];
   
   return [
@@ -67,7 +65,6 @@ const getLocationFromRequest = (req) => {
 const geolocationService = async (req, res, next) => {
   try {
     const { user } = req;
-    const currentLocation = getLocationFromRequest(req)[1];
    
     const distance = calculateDistance(
       ...R.concat(
@@ -88,6 +85,7 @@ const geolocationService = async (req, res, next) => {
     );
 
     await sendNotification('email')(message);
+    const currentLocation = getLocationFromRequest(req)[1];
     createCookie(res, 'last-location', currentLocation, COOCKIE_MAX_AGE);
     next();
 

@@ -86,7 +86,7 @@ const signup = async (req, res, next) => {
       hashPassword(body.password)
     )();
 
-    const tenantObj = R.set(R.lensProp('password'), hashedPassword, body);
+    const tenantObj = R.merge(body, { password: hashedPassword });
     const tenant = await saveTenant(tenantObj);
 
     if(!tenant.result && tenant.message) {
@@ -146,9 +146,10 @@ const sendTokenAndRefreshToken = (req, res) => {
   createCookie(res, 'token', token, COOKIE_MAX_AGE);
   createCookie(res, 'refresh-token', refreshToken, COOKIE_MAX_AGE);
 
-  res.status(200).send({csrfToken});
+  res.status(200).send({csrfToken, id: user.id});
 };
 
+//TODO: should also resend the refresh token
 const sendToken = (req, res) => {
   const { user } = req;
 

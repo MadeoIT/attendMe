@@ -41,7 +41,7 @@ describe('Geolocation for POST', () => {
       .post(baseUrl)
       .set('Cookie', `token=${token};last-location=51.9,4.5`)
       .set('current-location', '52.5,-0.2')
-      .set('Authorization', csrfToken)
+      .set('csrf-token', csrfToken)
       .send(fakeTodo);
 
     expect(res.status).toBe(200);
@@ -53,7 +53,7 @@ describe('Geolocation for POST', () => {
     const res = await request(server)
       .post(baseUrl)
       .set('Cookie', `token=${token};last-location=51.9,4.5`)
-      .set('Authorization', csrfToken)
+      .set('csrf-token', csrfToken)
       .send(fakeTodo);
 
     expect(res.status).toBe(200);

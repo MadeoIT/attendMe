@@ -71,7 +71,7 @@ describe('geo location service', () => {
     });
   });
 
-  it.only('composite function to calculate distance', () => {
+  it('composite function to calculate distance', () => {
     const R = require('ramda');
     const req = {
       cookies: {
@@ -92,7 +92,7 @@ describe('geo location service', () => {
         )
       )
     )
-  
+    
     expect(Math.floor(result)).toBeCloseTo(distance);
   })
 })

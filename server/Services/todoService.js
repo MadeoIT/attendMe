@@ -54,7 +54,7 @@ const deleteTodo = async(req, res, next) => {
   try {
     const { params, user } = req;
     await todoDAO.destroyTodoByIdAndTenantId(params.todoId, user.id)
-    res.status(200).send('Todo deleted');
+    res.status(200).send({id: params.todoId});
 
   } catch (error) {
     next(error);

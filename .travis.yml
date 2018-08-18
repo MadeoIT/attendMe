@@ -1,20 +1,32 @@
-language: node_js
-node_js:
-  - "9"
-dist: trusty
-services:
-  - postgresql
-before_script:
-  - psql -c 'create database database_test;' -U postgres
-  - npm install -g sequelize-cli
-  - NODE_ENV=ci sequelize db:migrate
-env: 
-  - NODE_ENV=ci
-cache: yarn
-before_install: cd server
-install: 
-  - yarn
-script:
-  - yarn test-ci
-after_script: "npm install coveralls@2.10.0 && cat ./coverage/lcov.info | coveralls"
+matrix:
+  include:
+    - language: node_js
+      node_js:
+        - "9"
+      dist: trusty
+      services:
+        - postgresql
+      before_script:
+        - psql -c 'create database database_test;' -U postgres
+        - npm install -g sequelize-cli
+        - NODE_ENV=ci sequelize db:migrate
+      env: 
+        - NODE_ENV=ci
+      cache: yarn
+      before_install: cd server
+      install: 
+        - yarn
+      script:
+        - yarn test-ci
+      after_script: "npm install coveralls@2.10.0 && cat ./coverage/lcov.info | coveralls"
+  
+    - language: node_js
+      node_js:
+        - "9"
+      dist: trusty
+      install:
+        - yarn
+      script:
+        - yarn test
+
 
