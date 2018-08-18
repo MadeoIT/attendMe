@@ -3,6 +3,7 @@ import Todos from '../../Component/Todo/Todos';
 import { mount } from 'enzyme';
 import Root from '../../Root';
 import moxios from '@anilanar/moxios';
+import { url } from '../../config';
 
 const DOMelems = {
   todoTableRow: '.todos-tr',
@@ -11,7 +12,7 @@ const DOMelems = {
 
 describe('Todos', () => {
 
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = url;
   let Component;
 
   beforeEach(() => {

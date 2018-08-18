@@ -24,9 +24,12 @@ matrix:
       node_js:
         - "9"
       dist: trusty
+      env: 
+        - NODE_ENV=test
+      cache: yarn
       before_install: cd client
       install:
-        - yarn install --production=false
+        - yarn
       script:
         - yarn test
 
