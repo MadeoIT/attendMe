@@ -24,6 +24,7 @@ matrix:
       node_js:
         - "9"
       dist: trusty
+      before_install: cd client
       install:
         - yarn
       script:
