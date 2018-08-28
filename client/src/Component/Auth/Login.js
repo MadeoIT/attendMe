@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import * as actions from './auth_actions';
 import LoginForm from './LoginForm';
+import EmailBox from './EmailBox';
 
 export class Login extends React.Component {
   constructor(...args) {
@@ -9,8 +10,12 @@ export class Login extends React.Component {
 
     this.onChange = this.onChange.bind(this);
     this.onFormSubmit = this.onFormSubmit.bind(this);
+    this.toggle = this.toggle.bind(this);
+    this.onSubmitEmail = this.onSubmitEmail.bind(this);
 
-    this.state = {}
+    this.state = {
+      isModalOpen: false
+    }
   }
 
   onChange(e){
@@ -20,7 +25,19 @@ export class Login extends React.Component {
 
   onFormSubmit(e){
     e.preventDefault();
-    this.props.login(this.state);
+    
+    this.props.login(this.state, () => {
+      this.props.history.push(`/todos`);
+    });
+  }
+
+  onSubmitEmail(){
+    this.props.sendResetPasswordEmail(this.state.resetEmail);
+    this.toggle();
+  }
+
+  toggle(){
+    this.setState({isModalOpen: !this.state.isModalOpen})
   }
 
   render(){
@@ -30,6 +47,16 @@ export class Login extends React.Component {
           onChange={this.onChange}
           onFormSubmit={this.onFormSubmit}
           {...this.state}
+          loading={this.props.loading}
+          toggle={this.toggle}
+        />
+        <EmailBox 
+          isModalOpen={this.state.isModalOpen} 
+          toggle={this.toggle}
+          onChange={this.onChange}
+          resetEmail={this.state.resetEmail}
+          onSubmitEmail={this.onSubmitEmail}
+          loading={this.props.loading}
         />
       </div>
     )
@@ -37,7 +64,8 @@ export class Login extends React.Component {
 };
 
 const mapStateToProps = state => ({
-  auth: state.auth
+  auth: state.auth,
+  loading: state.loading
 })
 
 export default connect(mapStateToProps, actions)(Login);

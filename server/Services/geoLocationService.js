@@ -31,7 +31,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 
 /**
  * Get a geolocation string and output an array of Coordinates
- * @param {String} coordinates 
+ * @param {String} location
  * @returns {Array<Number>}
  */
 const convertLocationToCoordinates = (location) => 

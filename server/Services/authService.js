@@ -3,7 +3,7 @@ const uuidv4 = require('uuid/v4');
 const R = require('ramda');
 
 //Functions
-const { updateTenant, saveTenant } = require('../Services/tenantService');
+const { updateTenant, saveTenant, saveTenantGoogle } = require('../Services/tenantService');
 const { 
   createEmailMessage, createTokenizedUrl, htmlResetPassword,
   htmlResetPasswordConfirm, htmlWelcome, htmlConfirmEmail
@@ -34,6 +34,10 @@ const resetPassowrd = async (req, res, next) => {
     const { user } = req;
     const { password } = req.body;
 
+    if(password.length < 8) {
+      return res.status(400).send('Password must be at least 8 characters');
+    }
+
     const hashedPassword = await R.pipeP(
       generateSalt, 
       hashPassword(password)
@@ -60,7 +64,7 @@ const mailPasswordReset = async (req, res, next) => {
   try {
     const { user } = req;
 
-    const url = rawUrl(user)('auth/password');
+    const url = rawUrl(user)('login/password');
     
     const message = createEmailMessage(
       'password-reset@todo.com', 
@@ -81,19 +85,13 @@ const signup = async (req, res, next) => {
   try {
     const { body } = req;
     
-    const hashedPassword = await R.pipeP(
-      generateSalt, 
-      hashPassword(body.password)
-    )();
-
-    const tenantObj = R.merge(body, { password: hashedPassword });
-    const tenant = await saveTenant(tenantObj);
+    const tenant = await saveTenant(body);
 
     if(!tenant.result && tenant.message) {
       return res.status(400).send(tenant.message);
     };
 
-    const url = rawUrl(tenant)('auth/confirm');
+    const url = rawUrl(tenant)('signup/confirm');
 
     const message = createEmailMessage(
       'confirm@todo.com', 
@@ -109,6 +107,23 @@ const signup = async (req, res, next) => {
     next(error);
   }
 };
+
+const signupGoogle = async (req, res, next) => {
+  try {
+    const { id, emails } = req.user;
+    const email = emails[0].value;
+    const tenantObj = {
+      email, googleId: id
+    };
+    
+    const tenant = await saveTenantGoogle(tenantObj)
+    req.user = tenant;
+    next();
+
+  } catch (error) {
+    next(error);
+  }
+}
 
 const confirmAccount = async (req, res, next) => {
   try {
@@ -131,10 +146,7 @@ const confirmAccount = async (req, res, next) => {
   }
 };
 
-const sendTokenAndRefreshToken = (req, res) => {
-  const { user } = req;
-  const csrfToken = uuidv4();
-
+const createTokensAndCookies = (res, user, csrfToken) => {
   const rawToken = R.pipe(
     createPayload(_, csrfToken),
     createToken, 
@@ -145,29 +157,64 @@ const sendTokenAndRefreshToken = (req, res) => {
   
   createCookie(res, 'token', token, COOKIE_MAX_AGE);
   createCookie(res, 'refresh-token', refreshToken, COOKIE_MAX_AGE);
+}
 
-  res.status(200).send({csrfToken, id: user.id});
+const login = (req, res) => {
+  const { user } = req;
+  const csrfToken = uuidv4();
+
+  createTokensAndCookies(res, user, csrfToken);
+  res.status(200).send({csrfToken, id: user.id, email: user.email});
 };
 
-//TODO: should also resend the refresh token
-const sendToken = (req, res) => {
+const loginGoogle = (req, res, next) => {
   const { user } = req;
+  const csrfToken = uuidv4();
 
-  const token = R.pipe(
-    createPayload(_, ''), 
-    createToken(_, tokenKey, tokenExp), 
-  )(user);
+  createTokensAndCookies(res, user, csrfToken);
+  req.csrfToken = csrfToken
+  next();
+};
 
-  createCookie(res, 'token', token, COOKIE_MAX_AGE);
+/**
+ * Send new token
+ * @param {*} req 
+ * @param {*} res 
+ * Check if the csrf token exist otherwise it will create a payload with undefined token
+ * and it will always be authorized
+ */
+const relogin = (req, res) => {
+  const { user } = req;
+  const csrfToken = req.headers['csrf-token'];
 
+  if(!csrfToken){
+    return res.status(401).send({});
+  };
+
+  createTokensAndCookies(res, user, csrfToken)
   res.status(200).send({});
 };
 
+/**
+ * Logout the client
+ * @param {*} req 
+ * @param {*} res 
+ * Invalidate the old cookies giving a maxAge of 0.
+ */
+const logout = (req, res) => {
+  createCookie(res, 'token', '', 0);
+  createCookie(res, 'refresh-token', '', 0);
+  res.status(200).send({});
+}
+
 module.exports = {
-  sendTokenAndRefreshToken,
-  sendToken,
+  login,
+  loginGoogle,
+  relogin,
   resetPassowrd,
   mailPasswordReset,
   signup,
+  signupGoogle,
+  logout,
   confirmAccount
 }

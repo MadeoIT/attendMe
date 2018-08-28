@@ -10,12 +10,13 @@ describe('Refresh token middleware', () => {
   const onSuccess = (data) => data;
   const action = {
     type: 'INVALID_TOKEN',
-    payload: { request: [todoUrl, { name: 'todo1' }], method: 'post', onSuccess }
+    payload: { request: { url: todoUrl, data: { name: 'todo1' }, method: 'post' }, onSuccess }
   };
 
   beforeEach(() => {
     fakeStore = {
-      dispatch: jest.fn()
+      dispatch: jest.fn(),
+      getState: jest.fn().mockReturnValue({ auth: { csrfToken: '123' } })
     };
     fakeNext = jest.fn()
     moxios.install();
@@ -38,7 +39,7 @@ describe('Refresh token middleware', () => {
     refreshToken(fakeStore)(fakeNext)(action);
 
     moxios.wait(() => {
-      expect(fakeStore.dispatch).toHaveBeenCalledTimes(2);
+      expect(fakeStore.dispatch).toHaveBeenCalledTimes(3);
       expect(fakeStore.dispatch).toHaveBeenCalledWith(expect.arrayContaining([{ name: 'todo1' }]));
       expect(fakeNext).not.toHaveBeenCalled();
       done();
@@ -55,6 +56,7 @@ describe('Refresh token middleware', () => {
 
     moxios.wait(() => {
       expect(fakeStore.dispatch).toHaveBeenCalledTimes(2);
+      expect(fakeStore.dispatch.mock.calls[0][0].payload.status).toEqual(401);
       done();
     })
   });
@@ -62,7 +64,7 @@ describe('Refresh token middleware', () => {
   it('should pass action to the next middleware', () => {
     const anotherAction = {
       type: 'SOME_OTHER_TYPE',
-      payload: { request: [todoUrl, { name: 'todo1' }], method: 'post', onSuccess }
+      payload: { request: { url: todoUrl, data: { name: 'todo1' }, method: 'post' }, onSuccess }
     };
     refreshToken(fakeStore)(fakeNext)(anotherAction);
 

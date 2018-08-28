@@ -10,9 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     alias: DataTypes.STRING,
     password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+      type: DataTypes.STRING
     },
     confirmed : {
       type: DataTypes.BOOLEAN,

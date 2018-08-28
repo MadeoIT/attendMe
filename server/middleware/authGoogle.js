@@ -9,6 +9,7 @@ const callbackURL = config.get('googleAuth.callbackURL');
 const googleAuth = new GoogleStrategy(
   { clientID, clientSecret, callbackURL }, 
   async (accessToken, refreshToken, profile, done) => {
+    
     const body = {...profile};
     return done(null, body);
   }

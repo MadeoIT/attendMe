@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     content: DataTypes.STRING,
     completed: {
       type: DataTypes.BOOLEAN,
-      default: false
+      defaultValue: false
     }
   });
   Todo.associate = (models) => {

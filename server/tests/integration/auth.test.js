@@ -6,12 +6,14 @@ const {
   generateFakeTenantObj,
   generateTenant,
   generateConfirmationToken
-} = require('../sharedBehaviours')
+} = require('../sharedBehaviours');
+let notification = require('../../middleware/notification');
 
 describe('authentication', () => {
   let server;
-
+ 
   beforeEach(() => {
+    jest.spyOn(notification, 'sendNotification').mockImplementation(() => () => {});
     server = require('../../app');
   });
 
@@ -44,7 +46,7 @@ describe('authentication', () => {
       expect(res.status).toBe(200);
       expect(res.header['set-cookie'][0]).toContain('token');
       expect(res.body.csrfToken).toBeDefined();
-      expect(typeof (res.body.csrfToken)).toBe('string');
+      expect(typeof res.body.csrfToken).toBe('string');
     });
 
     it('should not authenticate the user. Wrong password', async () => {
@@ -88,6 +90,7 @@ describe('authentication', () => {
     it('should relogIn with a new token', async () => {
       const res = await request(server)
         .post(reloginUrl)
+        .set('csrf-token', csrfToken)
         .set('Cookie', `refresh-token=${refreshToken}`)
        
       expect(res.status).toBe(200);
@@ -155,22 +158,6 @@ describe('authentication', () => {
       expect(res.status).toBe(200);
     })
   });
-
-  describe.skip('google auth20', () => {
-    const baseUrl = '/api/auth/google';
-
-    it('should hit the callback end point', async () => {
-      const res = await request(server)
-        .get(baseUrl);
-      
-      expect(res.status).toBe(200);
-      expect(res.body.email).toBe('gioioso.matteo@gmail.com');
-    });
-
-    it('should not add a new user', async () => {
-      
-    })
-  })
 
   describe('signup', () => {
     const baseUrl = '/api/auth/signup';

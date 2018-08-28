@@ -52,13 +52,13 @@ describe('Todo integration test', () => {
   });
 
   describe('find by id, find all, update', () => {
-    let todoId;
+    let todoId, result;
     const fakeTodo1 = generateFakeTodoObj();
     const fakeTodo2 = generateFakeTodoObj();
     const fakeTodo3 = generateFakeTodoObj();
 
     beforeEach(async () => {
-      const result = await Promise.all([
+      result = await Promise.all([
         db.Todo.create({
           ...fakeTodo1,
           tenantId: tenant_FK
@@ -72,6 +72,7 @@ describe('Todo integration test', () => {
         })
       ]);
       todoId = result[1].id;
+      todoId2 = result[0].id;
     });
 
     it('should find a list of todos', async () => {
@@ -118,6 +119,24 @@ describe('Todo integration test', () => {
       expect(res.status).toBe(200);
       expect(res.body.content).toBe(fakeTodo2 + 'updated');
       expect(res.body.completed).toBeTruthy();
+    });
+
+    it('should batch update todos', async () => {
+      const body = [
+        { id: todoId, content: 'todo1 updated', completed: true, modified: true },
+        { id: todoId2, content: 'todo2 updated', completed: false, modified: true },
+        { id: 23, content: 'todo2', completed: false }
+      ]
+
+      const res = await request(server)
+        .put(`${baseUrl}`)
+        .send(body)
+        .set('Cookie', `token=${token}`)
+        .set('csrf-token', csrfToken);
+
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(2);
+      expect(res.body[0].content).toBe(body[0].content);
     })
 
     it('should remove a todo', async () => {
@@ -131,7 +150,6 @@ describe('Todo integration test', () => {
       expect(res.status).toBe(200);
       expect(remainingTodos).toHaveLength(2);
     });
-
 
     //Auth edge cases
     it('should return 401 because wrong csrf token', async () => {

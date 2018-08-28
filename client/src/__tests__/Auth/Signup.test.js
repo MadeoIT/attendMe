@@ -1,22 +1,22 @@
 import React from 'react';
-import SignupConnected, { Signup } from "../../Component/Auth/Signup";
-import Root from '../../Root';
+import { Signup } from "../../Component/Auth/Signup";
 import moxios from 'moxios';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 
 describe('Auth Components', () => {
   describe('Signup Component', () => {
-    let Component;
+    let Component, spyFormSubmit;
+    const signup = jest.fn();
+    const onError = jest.fn();
 
     beforeEach(() => {
-      moxios.install();
-      Component = shallow(<Signup />)
+      spyFormSubmit = jest.spyOn(Signup.prototype, 'onFormSubmit');
+      Component = shallow(<Signup signup={signup} onError={onError}/>);
     });
 
     afterEach(() => {
-      Component.unmount();
-      moxios.uninstall();
-    });
+      jest.clearAllMocks();
+    })
 
     it('should render without crash', () => {
       expect(Component).toBeDefined();
@@ -39,26 +39,53 @@ describe('Auth Components', () => {
       ).toEqual('matteo@email.com');
     });
 
-    it.skip('should sign up a user', (done) => {
-      const spy = jest.spyOn(Signup.prototype, 'onFormSubmit');
-      //const Component = mount(<Si />);
-      Component.find('.signup-form').simulate('submit');
+    it('should submit the form', () => {
+      Component
+        .find('SignupForm')
+        .dive()
+        .find('.signup-password')
+        .simulate('change', { target: { name: 'password', value: '12345678' } });
+      Component
+        .find('SignupForm')
+        .dive()
+        .find('.confirm-password')
+        .simulate('change', { target: { name: 'confirmPassword', value: '12345678' } });
+      Component.update();
+      Component
+        .find('SignupForm')
+        .dive()
+        .find('.signup-form')
+        .simulate('submit', { preventDefault() { } });
       Component.update();
 
-      moxios.wait(() => {
-        let request = moxios.requests.mostRecent();
-        request.respondWith({
-          status: 200,
-          response: {}
-        }).then(() => {
+      expect(spyFormSubmit).toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
+      expect(signup.mock.calls[0][0]).toEqual({password: '12345678'});
+    });
 
-          expect(spy).toHaveBeenCalled();
-          done();
-        }).catch(err => {
-          console.log(err)
-          done()
-        })
-      })
-    })
+    it('should not submit form / password not matching', () => {
+      Component
+        .find('SignupForm')
+        .dive()
+        .find('.signup-password')
+        .simulate('change', { target: { name: 'password', value: '12345678' } });
+      Component.update();
+      Component
+        .find('SignupForm')
+        .dive()
+        .find('.confirm-password')
+        .simulate('change', { target: { name: 'confirmPassword', value: 'unmatchingpassword' } });
+      Component.update();
+      Component
+        .find('SignupForm')
+        .dive()
+        .find('.signup-form')
+        .simulate('submit', { preventDefault() { } });
+      Component.update();
+
+      expect(spyFormSubmit).toHaveBeenCalled();
+      expect(onError.mock.calls[0][0].data).toContain("not match");
+      expect(signup).not.toHaveBeenCalled();
+    });
   });
 });

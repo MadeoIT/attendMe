@@ -1,53 +1,40 @@
 import React from 'react';
-import moxios from '@anilanar/moxios';
-import { mount } from 'enzyme';
-import Root from '../../Root';
-import LoginConnected, { Login } from '../../Component/Auth/Login';
+import { shallow } from 'enzyme';
+import { Login } from '../../Component/Auth/Login';
 
 describe('Login', () => {
-  let Component;
-  let ComponentConnected;
+  let Component, spyFormSubmit;
+  const login = jest.fn();
 
   beforeEach(() => {
-    moxios.install();
-    Component = mount(<Login />);
-    ComponentConnected = mount(<Root><LoginConnected /></Root>);
+    spyFormSubmit = jest.spyOn(Login.prototype, 'onFormSubmit');
+    Component = shallow(<Login login={login}/>)
   });
-
-  afterEach(() => {
-    moxios.uninstall();
-    Component.unmount();
-    ComponentConnected.unmount();
-  });
-
-  it('should check initial state', () => {
-    expect(ComponentConnected.find('Login').prop('auth')).toMatchObject({ isAuthorized: false })
-  })
 
   it('should set the credential in the state', () => {
     Component
+      .find('LoginForm')
+      .dive()
       .find('.login-email')
       .simulate('change', { target: {name: 'email', value: 'my@email.com'}});
     Component.update();
 
-    expect(Component.find('.login-email').prop('value')).toEqual('my@email.com');
+    expect(Component
+      .find('LoginForm')
+      .dive()
+      .find('.login-email')
+      .prop('value')
+    ).toEqual('my@email.com');
   });
 
-  it('Should login a user and receive a csrf token', (done) => {
-    ComponentConnected.find('.login-form').simulate('submit');
-    
-    moxios.wait(() => {
-      let request = moxios.requests.mostRecent();
-      request.respondWith({
-        status: 200,
-        response: { csrfToken: '123' }
-      })
-      .then(() => {
-        ComponentConnected.update();
+  it('should submit the form', () => {
+    Component
+      .find('LoginForm')
+      .dive()
+      .find('.login-form')
+      .simulate('submit', { preventDefault() { } });
+    Component.update();
 
-        expect(ComponentConnected.find('Login').prop('auth')).toMatchObject({ isAuthorized: true })
-        done();
-      })
-    })    
+    expect(spyFormSubmit).toHaveBeenCalled();
   })
 })

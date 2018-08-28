@@ -1,11 +1,13 @@
 const R = require('ramda');
 const jwt = require('jsonwebtoken');
+const config = require('config');
 
 const createCookie = (res, name, data, maxAge) => {
-  res.cookie(name, data, { 
-    maxAge: maxAge, 
+  res.cookie(name, data, {
+    maxAge: maxAge,
     httpOnly: true,
-    secure: true
+    secure: config.get('cookie.secure'),
+    overwrite: true
   });
 };
 
@@ -15,7 +17,7 @@ const createPayload = R.curry(
       id: user.id,
       googleId: user.googleId,
       email: user.email,
-      iat: Date.now(),
+      iat: Math.floor(Date.now() / 1000),
       csrfToken
     };
   }

@@ -9,7 +9,9 @@ const { infoLogger, errorLogger } = require('./middleware/logger');
 infoLogger(app.get('env'));
 
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({ 
+  origin: 'http://localhost:3000', credentials: true 
+}));
 app.use(morgan('tiny'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());

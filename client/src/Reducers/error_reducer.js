@@ -5,7 +5,7 @@ export default (state = null, { type, payload = { status: 500 } }) => {
     return assignErrorMessage(payload);
   };
 
-  if(type === actionTypes.RESET_ERROR){
+  if (type === actionTypes.RESET_ERROR) {
     return null
   };
 
@@ -13,9 +13,12 @@ export default (state = null, { type, payload = { status: 500 } }) => {
 };
 
 function assignErrorMessage(payload) {
+
+  if(!payload.status) return payload.message;
+
   switch (payload.status) {
     case 500:
-      return payload.message || 'Something went wrong';
+      return 'Something went wrong';
     case 400:
       return payload.message || 'Bad request';
     case 404:
@@ -25,4 +28,4 @@ function assignErrorMessage(payload) {
     default:
       return 'Something went wrong'
   };
-}
+};

@@ -2,17 +2,21 @@ import React from 'react'
 import { Button, Dropdown, Menu, Container } from 'semantic-ui-react'
 import { Link } from 'react-router-dom';
 
+const onLogout = (logout) => {
+  logout();
+}
+
 const renderIfLogin = ({ auth }) => {
   return auth.isAuthorized
     ? (
       <React.Fragment>
         <Menu.Item name='home' />
-        <Menu.Item name='my todos' />
+        <Menu.Item name='my todos' as={Link} to='/todos'/>
       </React.Fragment>
     ) : null
 }
 
-const renderIfNotLogin = ({ auth }) => {
+const renderIfNotLogin = ({ auth, logout }) => {
   return !auth.isAuthorized
     ? (
       <React.Fragment>
@@ -24,7 +28,12 @@ const renderIfNotLogin = ({ auth }) => {
           <Button>Log in</Button>
         </Menu.Item>
       </React.Fragment>
-    ) : null
+    )
+    : (
+      <Menu.Item onClick={() => onLogout(logout)} >
+        <Button>Log out</Button>
+      </Menu.Item>
+    )
 }
 
 const Navbar = (props) => {

@@ -1,7 +1,6 @@
 import api from '../../Middlewares/api';
 import moxios from 'moxios';
 import { todoUrl } from '../../Component/Todo/todo_actions';
-import { onError } from '../../Actions/error_actions';
 
 describe('Api Middleware', () => {
   let fakeNext, fakeStore;
@@ -9,14 +8,17 @@ describe('Api Middleware', () => {
   beforeEach(() => {
     moxios.install();
     fakeNext = jest.fn()
-    fakeStore = { dispatch: jest.fn() };
+    fakeStore = {
+      dispatch: jest.fn(),
+      getState: jest.fn().mockReturnValue({ auth: { csrfToken: '123' } })
+    };
   });
 
   afterEach(() => {
     moxios.uninstall();
   });
 
-  it('should call dispatch a GET action', (done) => {
+  it('should make a GET request and dispatch the actions', (done) => {
     moxios.stubRequest(todoUrl, {
       status: 200,
       response: [{ name: 'todo1' }, { name: 'todo2' }]
@@ -24,19 +26,19 @@ describe('Api Middleware', () => {
     const onSuccess = (data) => data;
     const action = {
       type: 'API',
-      payload: { request: [todoUrl], method: 'get', onSuccess }
+      payload: { request: { url: todoUrl, method: 'get' }, onSuccess, message: 'message' }
     }
     api(fakeStore)(fakeNext)(action);
 
     moxios.wait(() => {
       expect(fakeStore.dispatch).toHaveBeenCalledWith(expect.arrayContaining([{ name: 'todo1' }]));
-      expect(fakeStore.dispatch).toHaveBeenCalledTimes(3);
+      expect(fakeStore.dispatch).toHaveBeenCalledTimes(4);
       expect(fakeNext).not.toHaveBeenCalled();
       done();
     })
   })
 
-  it('should call dispatch correctly the action', (done) => {
+  it('should make a POST request and dispatch the actions', (done) => {
     moxios.stubRequest(todoUrl, {
       status: 200,
       response: { name: 'todo1' }
@@ -44,18 +46,19 @@ describe('Api Middleware', () => {
     const onSuccess = (data) => data;
     const action = {
       type: 'API',
-      payload: { request: [todoUrl, { name: 'todo1' }], method: 'post', onSuccess }
+      payload: { request: { url: todoUrl, data: { name: 'todo1' }, method: 'post' }, onSuccess }
     }
     api(fakeStore)(fakeNext)(action);
 
     moxios.wait(() => {
-      expect(fakeStore.dispatch).toHaveBeenCalledWith({ name: 'todo1' })
+      expect(fakeStore.dispatch).toHaveBeenCalledWith({ name: 'todo1' });
+      expect(fakeStore.dispatch).toHaveBeenCalledTimes(3);
       expect(fakeNext).not.toHaveBeenCalled();
       done();
     })
   });
 
-  it('should pass action the action to the next middleware', (done) => {
+  it('should pass the action to the next middleware', (done) => {
     const action = {
       type: 'NEXT',
       payload: 'data'
@@ -77,13 +80,14 @@ describe('Api Middleware', () => {
     });
     const action = {
       type: 'API',
-      payload: { request: [todoUrl], method: 'get' }
+      payload: { request: { url: todoUrl, method: 'get' } }
     }
     api(fakeStore)(fakeNext)(action);
 
-    //TODO: add haveBeenCalledWith
     moxios.wait(() => {
       expect(fakeStore.dispatch).toHaveBeenCalledTimes(2);
+      expect(fakeStore.dispatch.mock.calls[1][0])
+        .toMatchObject({ type: 'INVALID_TOKEN', payload: action.payload })
       done();
     });
   });
@@ -95,12 +99,13 @@ describe('Api Middleware', () => {
     });
     const action = {
       type: 'API',
-      payload: { request: [todoUrl], method: 'get' }
+      payload: { request: { url: todoUrl, method: 'get' } }
     }
     api(fakeStore)(fakeNext)(action);
 
     moxios.wait(() => {
       expect(fakeStore.dispatch).toHaveBeenCalledTimes(3);
+      expect(fakeStore.dispatch.mock.calls[1][0].payload.status).toEqual(404)
       expect(fakeNext).not.toHaveBeenCalled()
       done();
     });

@@ -1,20 +1,7 @@
 import React from 'react';
-import { Button, Checkbox, Form, Segment, Icon } from 'semantic-ui-react'
+import { Button, Checkbox, Form, Segment, Divider } from 'semantic-ui-react'
 import { Grid } from 'semantic-ui-react'
-
-const renderOauthLink = (props) => {
-  return props.loading > 0 ? <div></div> : 
-  (
-    <Segment raised>
-      <Button color='google plus' fluid size='large'>
-        <Icon name='google plus' /> Google Plus
-          </Button><br />
-      <Button color='facebook' fluid size='large'>
-        <Icon name='facebook' /> Facebook
-          </Button>
-    </Segment>
-  )
-}
+import GoogleButton from './GoogleButton';
 
 const SignupForm = (props) => {
   return (
@@ -34,7 +21,7 @@ const SignupForm = (props) => {
               className="signup-email"
               name="email"
               onChange={(e) => props.onChange(e)}
-              type="text"
+              type="email"
               value={props.email || ''}
               placeholder='Email'
             />
@@ -78,12 +65,14 @@ const SignupForm = (props) => {
               />
             </Form.Field>
 
-            <Button fluid size='large'>Sign Up</Button>
+            <Button primary fluid size='large'>Sign Up</Button>
           </Form>
+
+          <Divider horizontal>Or</Divider>
+
+          <GoogleButton loading={props.loading}/>
+
         </Segment>
-
-        {renderOauthLink(props)}
-
       </Grid.Column>
     </Grid>
   )

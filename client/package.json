@@ -28,5 +28,13 @@
     "moxios": "^0.4.0",
     "redux-logger": "^3.0.6",
     "redux-mock-store": "^1.5.3"
+  },
+  "proxy": {
+    "/auth/google": {
+      "target": "http://localhost:8080"
+    },
+    "/api/*": {
+      "target": "http://localhost:8080"
+    }
   }
 }

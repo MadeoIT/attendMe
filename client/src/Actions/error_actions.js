@@ -5,7 +5,7 @@ export function onError(error) {
     type: actionTypes.RESPONSE_ERROR,
     payload: {
       status: error ? error.status : 500,
-      message: error ? error.message : 'Something went wrong',
+      message: error ? error.data : 'Something went wrong',
     }
   }
 }

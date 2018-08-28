@@ -1,7 +1,9 @@
 const Joi = require('joi');
 const tenantDAO = require('../DAOs/tenantDAO');
-const { tenantSchema } = require('../models/validationModels/tenantValidation');
+const { tenantSchema, tenantGoogleSchema } = require('../models/validationModels/tenantValidation');
 const { comparePassword } = require('../middleware/encryption');
+const R = require('ramda');
+const { generateSalt, hashPassword } = require('../middleware/encryption');
 
 /**
  * Persist Tenant into the database
@@ -12,25 +14,48 @@ const { comparePassword } = require('../middleware/encryption');
  */
 const saveTenant = async (tenant) => {
   const result = Joi.validate(tenant, tenantSchema);
-  
-  if(result.error) {
-    return { 
-      result: false, 
-      message: result.error.details[0].message 
+
+  if (result.error) {
+    return {
+      result: false,
+      message: result.error.details[0].message
     }
   };
-  
+
   const foundTenant = await tenantDAO.findTenantByEmail(tenant.email);
 
   if (foundTenant) {
-    return { 
-      result: false, 
+    return {
+      result: false,
       message: 'Email already exist'
     }
   }
 
-  return await tenantDAO.createTenant(tenant);
+  const hashedPassword = await R.pipeP(
+    generateSalt,
+    hashPassword(tenant.password)
+  )();
+
+  const tenantObj = R.merge(tenant, {
+    password: hashedPassword
+  });
+
+  return await tenantDAO.createTenant(tenantObj);
 };
+
+const saveTenantGoogle = async (tenant) => {
+  const result = Joi.validate(tenant, tenantGoogleSchema);
+
+  if (result.error) return;
+
+  const foundTenant = await tenantDAO.findTenantByEmail(tenant.email);
+
+  if (foundTenant) return foundTenant;
+
+  tenant.confirmed = true;
+  const savedTenant = await tenantDAO.createTenant(tenant);
+  return savedTenant;
+}
 
 const updateTenant = async (tenant, id) => {
   const result = await tenantDAO.updateTenantById(tenant, id);
@@ -48,7 +73,7 @@ const getTenantByEmail = async (email, done) => {
 
     const tenant = await tenantDAO.findTenantByEmail(email);
 
-    if (!tenant) return done(null, false);
+    if (!tenant) return done({ status: 404, message: 'Email does not exist' }, false);
 
     return done(null, tenant);
 
@@ -68,11 +93,11 @@ const checkTenantCredential = async (email, password, done) => {
   try {
     const tenant = await tenantDAO.findTenantByEmailAndConfirmed(email);
 
-    if (!tenant) return done(null, false)
+    if (!tenant) return done({ status: 401, message: 'Invalid email or password' }, false)
 
     const res = await comparePassword(password, tenant.password);
 
-    if (!res) return done(null, false);
+    if (!res) return done({ status: 401, message: 'Invalid email or passoword' }, false);
     return done(null, tenant);
 
   } catch (error) {
@@ -83,6 +108,7 @@ const checkTenantCredential = async (email, password, done) => {
 
 module.exports = {
   saveTenant,
+  saveTenantGoogle,
   checkTenantCredential,
   getTenantByEmail,
   updateTenant

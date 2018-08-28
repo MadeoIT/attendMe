@@ -4,13 +4,6 @@ describe('Utils function', () => {
 
   afterEach(() => {
     localStorage.clear();
-  })
-
-  it('should get auth headers with csrf token', () => {
-    localStorage.setItem('csrf-token', '123');
-    const token = getCsrfToken();
-
-    expect(token).toBe('123');
   });
 
   describe('Geolocation', () => {
@@ -19,14 +12,6 @@ describe('Utils function', () => {
         
       expect(result).toBe('51.1,45.3');
     });
-
-    it.skip('should return undefined', async () => {
-      const mockNavigator = {}
-      global.navigator = mockNavigator;
-      const result = await getGeolocation();
-
-      expect(result).toBeUndefined()
-    })
   });
 
   describe('getHeaders', () => {

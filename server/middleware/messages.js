@@ -2,7 +2,7 @@ const config = require('config');
 const origin = config.get('origin');
 
 const createTokenizedUrl = (token) => (partialUrl) => {
-  return `${origin}/api/${partialUrl}/${token}`
+  return `${origin}/${partialUrl}/${token}`
 };
 
 const createEmailMessage = (from, to, subject, html) => {

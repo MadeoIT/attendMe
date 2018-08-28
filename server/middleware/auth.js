@@ -4,7 +4,6 @@ const { Strategy: JwtStrategy } = require('passport-jwt');
 const LocalStrategy = require('passport-local');
 const { checkTenantCredential, getTenantByEmail } = require('../Services/tenantService');
 const config = require('config');
-const { changeObjectKeyName } = require('../factory');
 
 //Custom Token extractors
 const cookieTokenExtractor = function (req) {
@@ -39,18 +38,20 @@ const localEmailOption =  {
 const jwtOption = {
   jwtFromRequest: cookieTokenExtractor, //Custom extractor from cookie
   secretOrKey: config.get('encryption.jwtSk'),
-  passReqToCallback: true //The allow request object in the callback
+  passReqToCallback: true //Allow request object in the callback
 };
 
-//Strategy functions
+//Check the tenant credentials
 const login = new LocalStrategy(localOption, async(username, password, done) => {
   await checkTenantCredential(username, password, done);
 });
 
+//Check if tenant email is valid
 const email = new LocalStrategy(localEmailOption, async(username, _, done) => {
   await getTenantByEmail(username, done);
 });
 
+//Check if token is valid and compare it with csrf token
 const jwtAuth = new JwtStrategy(jwtOption, async(req, payload, done) => {
   const csrfToken = req.headers['csrf-token'];
   if(csrfToken !== payload.csrfToken) return done(null, false); //verify csrf token
@@ -103,7 +104,7 @@ const isValid = (validationStrategy) => {
   return passport.authenticate(validationStrategy, {session: false})
 }
 
-const googleScope = passport.authenticate('google', { scope: ['profile'] });
+const googleScope = passport.authenticate('google', { scope: ['profile', 'email'] });
 
 module.exports = {
   isValid,

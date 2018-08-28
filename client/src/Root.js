@@ -9,13 +9,24 @@ import { createLogger } from 'redux-logger';
 import refreshToken from './Middlewares/refreshToken';
 
 export default (props) => {
-  
+
   const logger = createLogger({
     colors: false
   });
 
+  /**
+   * Get the initial state from the local storage
+   */
+  const initialState = {
+    auth: { 
+      isAuthorized: !!localStorage.getItem('csrf-token'),
+      csrfToken: localStorage.getItem('csrf-token')
+    }
+  };
+
   const store = createStore(
     reducers,
+    initialState,
     applyMiddleware(
       api,
       refreshToken,
@@ -23,9 +34,20 @@ export default (props) => {
     )
   );
 
+  /**
+   * Persist the login state on the local storage
+   */
+  window.onbeforeunload = () => {
+    const { auth } = store.getState();
+  
+    if(auth.csrfToken){
+      localStorage.setItem('csrf-token', auth.csrfToken);
+    }
+  };
+
   return (
     <Provider store={store}>
       {props.children}
     </Provider>
   )
-}
+};

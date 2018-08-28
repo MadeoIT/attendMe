@@ -1,125 +1,91 @@
 import React from 'react';
-import Todos from '../../Component/Todo/Todos';
-import { mount } from 'enzyme';
-import Root from '../../Root';
-import moxios from '@anilanar/moxios';
-import { url } from '../../config';
+import TodosConnected, { Todos } from '../../Component/Todo/Todos';
+import { shallow } from 'enzyme';
 
 const DOMelems = {
   todoTableRow: '.todos-tr',
-  todoContent: '.todos-content'
+  todoContent: '.todos-input-content',
+  TodoForm: 'TodoForm'
 }
 
 describe('Todos', () => {
+  const todos = [
+    { id: 1, content: 'todo1', completed: false },
+    { id: 2, content: 'todo2', completed: false },
+  ];
 
-  const baseUrl = url;
-  let Component;
+  describe('Todos component', () => {
+    let Component, spyFormSubmit, spyDelete, spyUpdate;
+    const getAllTodos = jest.fn();
+    const createTodo = jest.fn();
+    const deleteTodo = jest.fn();
+    const updateTodo = jest.fn();
 
-  beforeEach(() => {
-    moxios.install();
-  });
-
-  afterEach(() => {
-    moxios.uninstall();
-    Component.unmount();
-  });
-
-  describe('Normal', () => {
     beforeEach(() => {
-      moxios.stubRequest(`${baseUrl}/api/todos`, {
-        status: 200,
-        response: [
-          { name: 'Todo1', id: 1 },
-          { name: 'Todo2', id: 2 },
-          { name: 'Todo3', id: 3 }
-        ]
-      });
-      Component = mount(<Root><Todos /></Root>);
+      spyFormSubmit = jest.spyOn(Todos.prototype, 'onFormSubmit');
+      spyUpdate = jest.spyOn(Todos.prototype, 'onUpdate');
+      spyDelete = jest.spyOn(Todos.prototype, 'onDelete');
+      Component = shallow(<Todos
+        getAllTodos={getAllTodos}
+        createTodo={createTodo}
+        deleteTodo={deleteTodo}
+        updateTodo={updateTodo}
+        todos={todos}
+        modifiedTodos={[]}
+      />);
     });
 
-    describe('Api actions / GET', () => {
-      it('should render a list of todos', (done) => {
-        moxios.wait(() => {
-          Component.update();
-
-          expect(Component.find(DOMelems.todoTableRow).length).toBe(3);
-          done();
-        })
-      });
+    it('should render without crash', () => {
+      expect(getAllTodos).toHaveBeenCalled();
+      expect(Component).toBeDefined();
     });
 
-    describe('Api actions / POST', () => {
-      it('should update the state with the typed value', () => {
-        Component
-          .find(DOMelems.todoContent)
-          .simulate('change', { target: { name: 'content', value: 'first todo' } });
-        Component.update();
+    it('should render a list of 2 todos', () => {
+      expect(Component
+        .find('TodoList')
+        .dive()
+        .find('.todos-tr')
+      ).toHaveLength(2);
+    })
 
-        expect(Component.find(DOMelems.todoContent).prop('value')).toEqual('first todo');
-      });
+    it('should sumbit the form', () => {
+      Component
+        .find(DOMelems.TodoForm)
+        .dive()
+        .find('.todos-form')
+        .simulate('submit', { preventDefault() { } })
+      Component.update();
 
-      it('should post a todo and and find a list of 4 todos', (done) => {
-        Component
-          .find('.todos-form')
-          .simulate('submit');
-        Component.update();
-
-        //Moxios is bugged
-        moxios.wait(() => {
-          let request = moxios.requests.mostRecent()
-          request.respondWith({
-            status: 200,
-            response: { name: 'Todo4', id: 4 }
-          })
-            .then(() => {
-              Component.update();
-
-              expect(Component.find(DOMelems.todoTableRow).length).toEqual(4);
-              done();
-            });
-        });
-      });
+      expect(spyFormSubmit).toHaveBeenCalled();
     });
 
-    describe('Api action / DELETE', () => {
-      it('should delete a todo', (done) => {
-        Component.update();
-        Component
-          .find('.todos-delete')
-          .at(0)
-          .simulate('click')
-        Component.update();
+    it('should update the state with the todo', () => {
+      Component
+        .find(DOMelems.TodoForm)
+        .dive()
+        .find(DOMelems.todoContent)
+        .simulate('change', { target: { name: 'content', value: 'todo3' } })
+      Component.update();
 
-        moxios.wait(() => {
-          let request = moxios.requests.mostRecent();
-          request.respondWith({
-            status: 200,
-            response: { id: 1 }
-          })
-            .then(() => {
-              Component.update();
+      expect(Component
+        .find(DOMelems.TodoForm)
+        .dive()
+        .find(DOMelems.todoContent)
+        .prop('value')
+      ).toEqual('todo3')
+    });
 
-              expect(Component.find(DOMelems.todoTableRow).length).toEqual(2);
-              done();
-            })
-        })
-      })
+    it('should call the delete function', () => {
+      Component
+        .find('TodoList')
+        .dive()
+        .find('.todos-delete')
+        .at(0)
+        .simulate('click');
+      Component.update();
+
+      expect(spyDelete).toHaveBeenCalled();
     })
   });
 
-  describe('Exception and edge cases', () => {
-    it('should return a 401', (done) => {
-      moxios.stubRequest(`${baseUrl}/api/todos`, {
-        status: 401,
-        response: {}
-      });
-      Component = mount(<Root><Todos /></Root>);
-      moxios.wait(() => {
-        Component.update();
-
-        expect(Component.find(DOMelems.todoTableRow).length).toBe(0);
-        done();
-      });
-    });
-  });
 });
