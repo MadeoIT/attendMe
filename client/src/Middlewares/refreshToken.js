@@ -4,7 +4,6 @@ import { onError } from '../Actions/error_actions';
 import { onRequestEnd } from '../Actions/loading_action';
 import actionTypes from '../Actions';
 
-import { url } from '../config';
 import { onMessage } from '../Actions/message_actions';
 
 /**
@@ -25,8 +24,8 @@ export default ({ dispatch, getState }) => next => async action => {
         headers, withCredentials: true
       };
 
-      //Request to obtain a new token (attached to the cookie)
-      await axios(`${url}/api/auth/relogin`, {
+      //Request to obtain a new token (refresh token is attached to the cookie)
+      await axios('/api/auth/relogin', {
         method: 'post', 
         ...options
       });

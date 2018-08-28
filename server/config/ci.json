@@ -19,5 +19,8 @@
     "clientSecret": "456",
     "callbackURL": "/api/auth/google/callback"
   },
+  "cookie": {
+    "secure": false
+  },
   "origin": "http://localhost:8080"
 }

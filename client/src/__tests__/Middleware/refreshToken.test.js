@@ -2,8 +2,6 @@ import refreshToken from '../../Middlewares/refreshToken';
 import moxios from 'moxios';
 import { todoUrl } from '../../Component/Todo/todo_actions';
 
-const baseUrl = process.env.BASE_URL
-
 describe('Refresh token middleware', () => {
   let fakeStore, fakeNext;
 
@@ -23,11 +21,12 @@ describe('Refresh token middleware', () => {
   });
 
   afterEach(() => {
+    jest.clearAllMocks();
     moxios.uninstall();
   });
 
   it('should dispatch the previous action / valid token', (done) => {
-    moxios.stubRequest(`${baseUrl}/api/auth/relogin`, {
+    moxios.stubRequest('/api/auth/relogin', {
       status: 200,
       response: {}
     });
@@ -47,7 +46,7 @@ describe('Refresh token middleware', () => {
   });
 
   it('should dispatch an error action / fail to obtain a new token', (done) => {
-    moxios.stubRequest(`${baseUrl}/api/auth/relogin`, {
+    moxios.stubRequest('/api/auth/relogin', {
       status: 401,
       response: {}
     });
