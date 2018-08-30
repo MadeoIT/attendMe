@@ -2,12 +2,12 @@
 [![Coverage Status](https://coveralls.io/repos/github/MadeoIT/NotAnotherTodo_ReactNodeJs/badge.svg?branch=master)](https://coveralls.io/github/MadeoIT/NotAnotherTodo_ReactNodeJs?branch=master)
 
 # NOT ANOTHER TODO
-This project is not intended as a production ready application. It is just a demostration of my coding ability, this is my coding style and how I work =D.
+This project is not intended as a production ready application. It is just a demonstration of my coding ability =D.
 
 This is not a normal todo, but is a wrapper around it and it includes the following features:
 * Multitenancy shared database architecture with JWT data separation for each query.
 * Local authentication, google authentication.
-* Account email confirmation and passoword rest email.
+* Account email confirmation and password rest.
 * Rate limiter.
 * JWT token, refresh token and csrf token.
 
@@ -25,21 +25,21 @@ This is not a normal todo, but is a wrapper around it and it includes the follow
 ## Servers side architecture
 The server is running on nodejs. The framework used is Expressjs with Sequelize as ORM.
 
-The authentication flow is based on tokens, all the tokens are saved in the cookies with no sessions so that the system can be easly scalable across multiple instances.
+The authentication flow is based on tokens, all the tokens are saved in the cookies with no sessions so that the system can be easily  scalable across multiple instances.
 To avoid cross side request forgery the server will send, via header, another token (csrf-token) which will be saved in the localStorage in the client. 
 The csrf-token is also saved in the token payload so that the server can compare them for each request.
 
-The data separation, across the tenants, is achieved in the server side via token, every decoded payload contains tenant id which will be used to make the query and retrive the data for each tenant.
+The data separation, across the tenants, is achieved in the server side via token, every decoded payload contains tenant id which will be used to make the query and retrieve the data for each tenant.
 
 ### Tokens and Cookies
-* Normal token: JWT token which will be verify for each request, but it will not be verified against the database to avoid performace bottleneck. This token expire every 15 minutes
+* Normal token: JWT token which will be verify for each request, but it will not be verified against the database to avoid performance bottleneck. This token expire every 15 minutes
 * Refresh token: JWT token will be checked if the normal token is not valid or expired. This token will be verified against the database. This token expires every 7 days.
-* The cookies will expire every 7 days of inacivity.
+* The cookies will expire every 7 days of inactivity.
 
 ## Client side architecture
 React and Redux have been used for the client side.
 To handle all the request I have used a central middleware "api.js"; this middleware will handle all the async logic so that the action creators do not contain any logic at all only plain objects.
-In addition to handle the token/refresh-token logic a second middleware "refreshToken.js" has been added. In case the normal token will expire (after 15 minutes) the second middleware will send a request to obtain a new token, if the refresh token is valid. Upon recieving back both tokens the middleware will simply resend the previous request.
+In addition to handle the token/refresh-token logic a second middleware "refreshToken.js" has been added. In case the normal token will expire (after 15 minutes) the second middleware will send a request to obtain a new token, if the refresh token is valid. Upon receiving  back both tokens the middleware will simply resend the previous request.
 
 
 ## Getting Started
@@ -92,7 +92,11 @@ and then your app will be running at that IP address + port 8080. Usually is:
 ```
 #### Without Docker
 Install postgres and modify the config.json "production" in the server/config folder accordingly to your database credentials
+Then run on both the /server and the /client folder
 
+```
+yarn or npm install && yarn start or npm start
+```
 
 ## Authors
 
