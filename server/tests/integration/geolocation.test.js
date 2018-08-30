@@ -35,7 +35,7 @@ describe('Geolocation for POST', () => {
     ])
   })
 
-  it('should send and set the coockie with the last location', async() => {
+  it.skip('should send and set the coockie with the last location', async() => {
     const fakeTodo = generateFakeTodoObj();
     const res = await request(server)
       .post(baseUrl)

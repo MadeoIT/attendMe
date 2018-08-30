@@ -1,0 +1,27 @@
+#Note: this compose file is not intended as production build
+#This is only for demonstration purposes
+version: '3'
+services:
+  server:
+    image: multitenanttodo_default
+    build: 
+      context: .
+      dockerfile: server.DockerFile
+    ports:
+      - "8080:8080"
+    depends_on: 
+      - db
+    links:
+      - db
+    working_dir: /var/www/notanothertodo/server
+    command: bash -c "sleep 10 && sequelize db:migrate && yarn start-docker"
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_DB: notanothertodo
+      

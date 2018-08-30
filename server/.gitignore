@@ -1,4 +1,7 @@
 /node_modules
 /config/test.json
 /config/development.json
+/config/production.json
 /coverage
+logfile.log
+yarn-error.log

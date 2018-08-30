@@ -26,6 +26,7 @@ const sendEmailNodemailer = (message) => {
  * While in testing and development another kind of service.
  * @param {String} environment enviroment variable
  * @returns {Function} the function correspondant to the service
+ * Ex: for production you might want to use mailgun API.
  */
 const getMailService = (environment) => {
   switch (environment) {
@@ -34,7 +35,7 @@ const getMailService = (environment) => {
     case 'ci':
       return sendEmailNodemailer;
     case 'production':
-      return;
+      return sendEmailNodemailer;
   }
 };
 

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import * as actions from './auth_actions';
 import LoginForm from './LoginForm';
 import EmailBox from './EmailBox';
+import { getGeolocation } from '../../Utils';
 
 export class Login extends React.Component {
   constructor(...args) {
@@ -15,6 +16,15 @@ export class Login extends React.Component {
 
     this.state = {
       isModalOpen: false
+    }
+  }
+
+  async componentDidMount() {
+    try {
+      const geolocation = await getGeolocation();
+      localStorage.setItem('geolocation', geolocation);
+    } catch (error) {
+      console.log(error);
     }
   }
 

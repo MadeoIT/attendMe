@@ -14,7 +14,7 @@ export const getGeolocation = () => new Promise((resolve, reject) => {
   if (global.navigator && global.navigator.geolocation) {
     return global.navigator.geolocation.getCurrentPosition((position, err) => {
       if (err) reject(err);
-
+    
       const { coords: { latitude, longitude } } = position;
       resolve(`${latitude},${longitude}`);
     })

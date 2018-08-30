@@ -19,7 +19,7 @@ const tokenExp = config.get('encryption.tokenExp');
 const refreshTokenExp = config.get('encryption.refreshTokenExp');
 const confirmationTokenExp = config.get('encryption.confirmationTokenExp');
 const confirmationTokenKey = config.get('encryption.jwtConfirmationSk');
-const COOKIE_MAX_AGE = 14 * 24 * 60 * 60 * 1000; //Two weeks
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; //One week
 
 const _ = R.__; //ramda placeholder for curried function
 
