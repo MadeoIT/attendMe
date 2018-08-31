@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 import { 
-  GET_TODOS, CREATE_TODO, UPDATE_TODO, DELETE_TODO, UPDATE_TODO_PROPERTIES 
+  GET_TODOS, CREATE_TODO, UPDATE_TODO, DELETE_TODO, UPDATE_TODO_PROPERTIES, RESET_UPDATED_TODOS
 } from './todo_actions';
 
 export default function (state = [], { payload, type }) {
@@ -13,12 +13,30 @@ export default function (state = [], { payload, type }) {
       return updateTodo(state, payload);
     case UPDATE_TODO_PROPERTIES:
       return updateTodoProperties(state, payload);
+    case RESET_UPDATED_TODOS:
+      return resetUpdatedTodos(state);
     case DELETE_TODO:
       return removeTodo(state, payload)
     default:
       return state;
   }
 };
+
+/**
+ * Reset the updated todo
+ * @param {Array<Object>} state array of todos
+ * Once the todos have been updated delete the modified property
+ */
+function resetUpdatedTodos(state) {
+  return state.map(todo => {
+    if(todo.modified === true) {
+      const newTodoObj = {...todo};
+      delete newTodoObj.modified;
+      return newTodoObj;
+    }
+    return todo;
+  });
+}
 
 /**
  * Update a single todo property

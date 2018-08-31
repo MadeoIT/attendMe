@@ -3,6 +3,7 @@ import actionTypes from '../../Actions';
 export const GET_TODOS = 'GET_TODOS';
 export const CREATE_TODO = 'CREATE_TODO';
 export const UPDATE_TODO = 'UPDATE_TODO';
+export const RESET_UPDATED_TODOS = 'RESET_UPDATED_TODOS';
 export const UPDATE_TODO_PROPERTIES = 'UPDATE_TODO_PROPERTIES';
 export const DELETE_TODO = 'DELETE_TODO';
 export const ERROR_TODO = 'ERROR_TODO';
@@ -88,7 +89,7 @@ export function updateTodoBatch(todos) {
         method: 'put'
       },
       onSuccess: (_) => ({
-        type: 'NONE',
+        type: RESET_UPDATED_TODOS,
         payload: {}
       }),
       message: {

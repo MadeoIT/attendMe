@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Switch, Route, Link, withRouter } from 'react-router-dom';
+import { Switch, Route, withRouter, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import * as authActions from './Component/Auth/auth_actions';
 
@@ -17,6 +17,13 @@ import ResetPassword from './Component/Auth/ResetPassword';
 
 export class App extends Component {
   render() {
+
+    const renderFirstPage = (isAuthorized) => (
+      isAuthorized 
+        ? <Redirect to='/todos' />
+        : <Redirect to='/login' /> 
+    );
+
     return (
       <div>
         <Navbar auth={this.props.auth} logout={this.props.logout}/>
@@ -30,7 +37,7 @@ export class App extends Component {
           <PrivateRoute path='/todos' component={Todos} auth={this.props.auth} />
           <Route path='/login' component={Login} />
           <Route path='/signup' component={Signup} />
-          <Route exact path='/' component={Login} />
+          {renderFirstPage(this.props.auth.isAuthorized)}
         </Switch>
       </div>
     );

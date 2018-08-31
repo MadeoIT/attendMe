@@ -1,6 +1,6 @@
 import todo_reducers from '../../Component/Todo/todo_reducers';
 import { 
-  GET_TODOS, UPDATE_TODO, DELETE_TODO, CREATE_TODO, UPDATE_TODO_PROPERTIES
+  GET_TODOS, UPDATE_TODO, DELETE_TODO, CREATE_TODO, RESET_UPDATED_TODOS, UPDATE_TODO_PROPERTIES
 } from '../../Component/Todo/todo_actions'
 
 describe('Todo Reducer', () => {
@@ -62,6 +62,23 @@ describe('Todo Reducer', () => {
       id: 3, content: 'todo3 updated', completed: false, modified: true
     })
     expect(newState).not.toContain(state[2]);
+  });
+
+  it('should RESET_UPDATED_TODOS', () => {
+    const state = [
+      { id: 1, content: 'todo1', completed: false, modified: true },
+      { id: 2, content: 'todo2', completed: false, modified: true },
+      { id: 3, content: 'todo3', completed: false }
+    ];
+    const action = {
+      type: RESET_UPDATED_TODOS,
+      payload: {}
+    };
+    const newState = todo_reducers(state, action);
+
+    expect(newState.length).toBe(3);
+    expect(newState.some(todo => todo.modified)).toBeFalsy();
+    expect(Object.keys(newState[0]).length).toBe(3);
   })
 
   it('should DELETE_TODO', () => {

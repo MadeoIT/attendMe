@@ -7,10 +7,10 @@ import * as actionsMessage from '../../Actions/message_actions';
 class GoogleAuth extends React.Component {
 
   componentDidMount() {
-    const { signupGoogle, onMessaage, history, match } = this.props;
+    const { signupGoogle, onMessage, history, match } = this.props;
     signupGoogle(match.params.tokenId);
-    onMessaage('Login successfull');
-    history.push('/todos')
+    onMessage('Login successful');
+    history.push('/todos');
   }
 
   render() {
