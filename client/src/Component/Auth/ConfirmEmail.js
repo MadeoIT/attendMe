@@ -18,7 +18,7 @@ class ConfirmEmail extends React.Component {
           <Message>
             <Message.Item>
               If your confirmation email has expired click here to send it again
-                </Message.Item >
+            </Message.Item >
             <Message.Item>Your confirmation will expire after 5 minutes</Message.Item>
           </Message>
         )

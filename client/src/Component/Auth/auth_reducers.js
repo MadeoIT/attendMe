@@ -1,7 +1,11 @@
-import { LOG_IN, LOG_OUT } from './auth_actions';
+import { LOG_IN, LOG_OUT, SIGN_UP } from './auth_actions';
 
 export default function (state = { isAuthorized: false }, { type, payload }) {
   switch (type) {
+    case SIGN_UP:
+      return {
+        email: payload.email
+      }
     case LOG_IN:
       return { 
         isAuthorized: !!payload.csrfToken,

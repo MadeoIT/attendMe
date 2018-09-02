@@ -189,6 +189,17 @@ describe('authentication', () => {
       expect(res.error.text).toContain('confirmed', 'forbidden');
     });
 
+    it('should resend confirmation email', async () => {
+      await generateTenant(tenantObj);
+      const email = tenantObj.email;
+      const res = await request(server)
+        .post(`${baseUrl}/resend`)
+        .send({email});
+      
+      expect(res.status).toBe(200);
+      expect(res.body.email).toBe(email);
+    });
+
     //Error of save tenant is handled correctly 
     //And propagate through the middleware chain
     it('should handle error in saveTenant', async () => {

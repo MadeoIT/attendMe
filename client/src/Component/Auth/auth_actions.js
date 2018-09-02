@@ -47,7 +47,10 @@ export function signup(tenantObj, callback) {
         method: 'post',
         data: tenantObj
       },
-      onSuccess: (_) => ({ type: SIGN_UP }),
+      onSuccess: (data) => ({
+        type: SIGN_UP,
+        payload: data
+      }),
       message: {
         header: 'Your user registration was successful',
         content: 'Please check your email to confirm your account!'
@@ -88,7 +91,7 @@ export function confirmEmail(tokenId) {
         url: `${authUrl}/signup/${tokenId}`,
         method: 'get'
       },
-      onSuccess: (_) => ({ type: SIGN_UP }),
+      onSuccess: (_) => ({ type: 'NONE' }),
       message: {
         header: 'Congratulations!',
         content: 'Your email has been verified, you can now log in'
@@ -97,11 +100,19 @@ export function confirmEmail(tokenId) {
   }
 };
 
-export function resendConfirmEmail(params) {
+export function resendConfirmEmail(email) {
   return {
     type: actionTypes.API,
     payload: {
-
+      request: {
+        url: `${authUrl}/signup/resend`,
+        method: 'post',
+        data: { email }
+      },
+      onSuccess: (_) => ({ type: 'NONE' }),
+      message: {
+        header: 'Email sent'
+      }
     }
   }
 };
@@ -133,7 +144,7 @@ export function resetPassword(token, password, callback) {
         method: 'post',
         data: { password }
       },
-      onSuccess: (_) => ({type: 'NONE'}),
+      onSuccess: (_) => ({ type: 'NONE' }),
       message: {
         header: 'Your password has been reset'
       },

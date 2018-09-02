@@ -123,6 +123,26 @@ const signupGoogle = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+const resendConfirmationEmail = async (req, res, next) => {
+  try {
+    const { user } = req;
+    const url = rawUrl(user)('signup/confirm');
+
+    const message = createEmailMessage(
+      'confirm@todo.com', 
+      user.email,
+      'Confirm email',  
+      htmlConfirmEmail(url)
+    );
+    await sendNotification('email')(message);
+
+    res.status(200).send(user);
+    
+  } catch (error) {
+    next(error)
+  }
 }
 
 const confirmAccount = async (req, res, next) => {
@@ -213,6 +233,7 @@ module.exports = {
   relogin,
   resetPassowrd,
   mailPasswordReset,
+  resendConfirmationEmail,
   signup,
   signupGoogle,
   logout,
