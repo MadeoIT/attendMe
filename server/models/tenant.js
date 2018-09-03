@@ -1,28 +1,28 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   var Tenant = sequelize.define('Tenant', {
-    googleId: DataTypes.STRING,
-    fullName: DataTypes.STRING,
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
-    },
-    alias: DataTypes.STRING,
-    password: {
-      type: DataTypes.STRING
-    },
-    confirmed : {
+    isTenant: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false
+      defaultValue: true
     },
-    blocked : {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
+    numberOfEmployes: {
+      type: DataTypes.VIRTUAL(
+        DataTypes.INTEGER, 
+        '(SELECT COUNT(id) FROM employee WHERE tenantId = `tenant`.id) as numberOfEmployes'
+      )
     }
   });
   Tenant.associate = (models) => {
-    Tenant.hasMany(models.Todo, {
+    Tenant.hasOne(models.Identity, {
+      foreignKey: 'tenantId'
+    });
+    Tenant.hasOne(models.UserInfo, {
+      foreignKey: 'tenantId'
+    });
+    Tenant.hasMany(models.Employee, {
+      foreignKey: 'tenantId'
+    });
+    Tenant.hasMany(models.Address, {
       foreignKey: 'tenantId'
     });
   };

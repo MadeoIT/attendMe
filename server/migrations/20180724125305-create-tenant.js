@@ -8,27 +8,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      googleId: {
-        type: Sequelize.STRING
-      },
-      fullName: {
-        type: Sequelize.STRING
-      },
-      email: {
-        allowNull: false,
-        type: Sequelize.STRING
-      },
-      alias: {
-        type: Sequelize.STRING
-      },
-      password: {
-        type: Sequelize.STRING
-      },
-      confirmed: {
-        type: Sequelize.BOOLEAN
-      },
-      blocked: {
-        type: Sequelize.BOOLEAN
+      isTenant : {
+        type: Sequelize.BOOLEAN,
+        allowNull: false
       },
       createdAt: {
         allowNull: false,
