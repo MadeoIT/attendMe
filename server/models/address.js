@@ -8,10 +8,10 @@ module.exports = (sequelize, DataTypes) => {
     state: DataTypes.STRING
   }, {});
   Address.associate = function(models) {
-    Address.belogsTo(models.Tenant, {
+    Address.belongsTo(models.Tenant, {
       foreignKey: 'tenantId'
     });
-    Address.belogsTo(models.Employee, {
+    Address.belongsTo(models.Employee, {
       foreignKey: 'employeeId'
     });
   };

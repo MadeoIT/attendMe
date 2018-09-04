@@ -9,7 +9,7 @@ const {
 } = require('../sharedBehaviours');
 let notification = require('../../middleware/notification');
 
-describe('authentication', () => {
+describe.skip('authentication', () => {
   let server;
  
   beforeEach(() => {

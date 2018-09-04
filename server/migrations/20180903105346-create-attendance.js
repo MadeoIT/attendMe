@@ -8,26 +8,13 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      day: {
-        type: Sequelize.INTEGER
-      },
-      year: {
-        type: Sequelize.INTEGER
-      },
-      month: {
-        type: Sequelize.INTEGER
-      },
-      timeAttendedMinutes: {
-        type: Sequelize.INTEGER
-      },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
+      day: Sequelize.INTEGER,
+      year: Sequelize.INTEGER,
+      month: Sequelize.STRING,
+      startTime: Sequelize.ARRAY(Sequelize.INTEGER), 
+      finishTime: Sequelize.ARRAY(Sequelize.INTEGER),
+      timeZone: Sequelize.INTEGER,
+      timeAttendedMinutes: Sequelize.INTEGER,
       tenantId: {
         type: Sequelize.INTEGER,
         onDelete: 'CASCADE',
@@ -46,6 +33,8 @@ module.exports = {
           as: 'employeeId'
         }
       }
+    }, {
+      timestamps: false
     });
   },
   down: (queryInterface, Sequelize) => {

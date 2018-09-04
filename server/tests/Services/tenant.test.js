@@ -4,7 +4,7 @@ const { generateSalt, hashPassword } = require('../../middleware/encryption');
 const tenantDAO = require('../../DAOs/tenantDAO');
 const R = require('ramda');
 
-describe('Tenant', () => {
+describe.skip('Tenant', () => {
 
   describe('Check tenant credential', () => {
     let done;

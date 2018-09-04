@@ -8,7 +8,7 @@ const {
 } = require('../sharedBehaviours');
 
 
-describe('Geolocation for POST', () => {
+describe.skip('Geolocation for POST', () => {
   let server, token, csrfToken, tenant_FK;
   const baseUrl = '/api/todos'
 

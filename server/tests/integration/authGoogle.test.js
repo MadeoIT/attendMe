@@ -3,7 +3,7 @@ const db = require('../../models');
 const auth = require('../../middleware/auth');
 const tenantDAO = require('../../DAOs/tenantDAO');
 
-describe('google auth20', () => {
+describe.skip('google auth20', () => {
   let server;
   const baseUrl = '/auth/google/callback';
   const user = {

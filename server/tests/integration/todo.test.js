@@ -9,7 +9,7 @@ const {
   generateFakeTenantObj
 } = require('../sharedBehaviours');
 
-describe('Todo integration test', () => {
+describe.skip('Todo integration test', () => {
   let server, token, csrfToken, tenant_FK;
   const baseUrl = '/api/todos'
 

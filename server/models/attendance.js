@@ -1,39 +1,20 @@
 'use strict';
+const attendanceHooks = require('./hooks/attendanceHooks')
 module.exports = (sequelize, DataTypes) => {
   const Attendance = sequelize.define('Attendance', {
     day: DataTypes.INTEGER, 
     year: DataTypes.INTEGER,
     month: DataTypes.STRING,
-    startTime: DataTypes.STRING, //Added recently, TODO: put it in hooks
-    finishTime: DataTypes.STRING,
-    timeAttendedMinutes: Sequelize.INTEGER //Could be trasformed in a VIRTUAL field
+    startTime: DataTypes.ARRAY(DataTypes.INTEGER),
+    finishTime: DataTypes.ARRAY(DataTypes.INTEGER),
+    timeZone: DataTypes.INTEGER,
+    timeAttendedMinutes: DataTypes.INTEGER //Turned into HOUR
   }, {
     hooks: {
-      beforeCreate: (attendance, options) => {
-        const monthArray = [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December'
-        ];
-        const date = new Date().toISOString().split('T')[0].split('-');
-        const month = Number(date[1]);
-        const day = Number(date[2]);
-        const year = Number(date[0]);
-
-        attendance.month = monthArray[month];
-        attendance.day = day;
-        attendance.year = year;
-      }
-    }
+      beforeCreate: attendanceHooks.beforeCreateAttendance,
+      beforeUpdate: attendanceHooks.beforeUpdateAttendance
+    },
+    timestamps: false
   });
   Attendance.associate = function (models) {
     Attendance.belongsTo(models.Employee, {

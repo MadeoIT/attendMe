@@ -3,7 +3,7 @@ const {
 } = require('../../Services/geoLocationService');
 const { generateFakeTenantObj } = require('../sharedBehaviours');
 
-describe('geo location service', () => {
+describe.skip('geo location service', () => {
   const point1 = [51.9, 4.5];
   const point2 = [52.5, -0.2];
 
