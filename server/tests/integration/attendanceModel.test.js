@@ -37,6 +37,6 @@ describe('attendance model integration test', () => {
     
     expect(res.finishTime).toEqual([3, 40]);
     expect(res.startTime).toEqual([3, 40]);
-    expect(res.timeAttendedMinutes).toBe(0);
+    expect(res.timeAttended).toBe(0);
   })
 })

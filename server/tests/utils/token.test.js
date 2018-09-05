@@ -1,11 +1,11 @@
-const { createToken, createPayload } = require('../../middleware/token');
+const { createToken, createPayload } = require('../../utils/token');
 const jwt = require('jsonwebtoken');
 
 const tokenKey = '123';
 const csrfToken = 'abc';
 const tokenExp = '15m'
 
-describe.skip('token', () => {
+describe('token', () => {
   const user = {
     id: 1,
     email: 'matteo@email'

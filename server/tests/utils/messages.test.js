@@ -1,7 +1,7 @@
-const { createEmailMessage, createTokenizedUrl } = require('../../middleware/messages');
-const { generateFakeTenantObj } = require('../sharedBehaviours')
+const { createEmailMessage, createTokenizedUrl } = require('../../utils/messages');
+const { generateFakeTenantObj } = require('../sharedBehaviours');
 
-describe.skip('messages', () => {
+describe('messages', () => {
 
   it('should create an email object', () => {
     const tenant = generateFakeTenantObj();

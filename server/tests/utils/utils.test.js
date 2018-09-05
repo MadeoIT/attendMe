@@ -1,4 +1,4 @@
-const { changeObjectKeyName, changeObjectKeyValue } = require('../factory');
+const { changeObjectKeyName, changeObjectKeyValue } = require('../../utils');
 
 describe('Factory functions', () => {
   it('should substitute key name in objet', () => {

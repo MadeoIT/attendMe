@@ -32,6 +32,12 @@ const attendanceHooks = {
     const hourWithTimeZone = Number(timeArray[0]) + Number(timeZone);
     return [hourWithTimeZone, Number(timeArray[1])];
   },
+
+  /**
+   * @param {Array<Number>} startTime ex: [5, 50]
+   * @param {Array<Number>} finishTime
+   * Minutes are converted into hours Ex: 20 mins / 60 mins = 0.4 hours
+   */
   getTimeAttended: (startTime, finishTime) => {
     const hours = finishTime[0] - startTime[0];
     const minutes =
@@ -41,6 +47,10 @@ const attendanceHooks = {
     return hours + minutes;
   },
 
+  /**
+   * Upon instantiation the Attendance model will set year, month, day and startTime
+   * The only input data needed will be the timeZone which depends from the client
+   */
   beforeCreateAttendance: (attendance, options) => {
     const dateTimeArray = attendanceHooks.getDateTimeArray(new Date());
     const date = dateTimeArray[0].split('-');
@@ -51,13 +61,18 @@ const attendanceHooks = {
     attendance.year = Number(date[0]);
     attendance.startTime = startTime;
   },
+
+  /**
+   * After update the Attendance model will set the finishTime from the current time
+   * and calculate the differce between the finishTime and startTime in hours
+   */
   beforeUpdateAttendance: (attendance, options) => {
     const dateTimeArray = attendanceHooks.getDateTimeArray(new Date());
     const finishTime = attendanceHooks.getHourMinuteArray(dateTimeArray[1], attendance.timeZone);
     const timeAttended = attendanceHooks.getTimeAttended(attendance.startTime, finishTime);
 
     attendance.finishTime = finishTime;
-    attendance.timeAttendedMinutes = timeAttended;
+    attendance.timeAttended = timeAttended;
   }
 }
 

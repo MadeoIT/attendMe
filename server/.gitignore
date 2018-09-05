@@ -3,5 +3,6 @@
 /config/development.json
 /config/production.json
 /coverage
+/.scrapTests
 logfile.log
 yarn-error.log

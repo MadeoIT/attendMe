@@ -11,7 +11,7 @@ describe('hooks', () => {
       startTime: null, 
       finishTime: null,
       timeZone: -1,
-      timeAttendedMinutes: null,
+      timeAttended: null,
     }
   });
 
@@ -43,7 +43,7 @@ describe('hooks', () => {
     attendanceHooks.beforeUpdateAttendance(attendance);
 
     expect(attendance.finishTime).toEqual([6, 20]);
-    expect(attendance.timeAttendedMinutes).toBe(1.7);
+    expect(attendance.timeAttended).toBe(1.7);
   });
 
   it('should get the total attended time', () => {

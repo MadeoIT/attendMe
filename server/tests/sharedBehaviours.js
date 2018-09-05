@@ -1,7 +1,7 @@
 const db = require('../models');
-const { createPayload, createToken } = require('../middleware/token');
+const { createPayload, createToken } = require('../utils/token');
 const config = require('config');
-const { generateSalt, hashPassword } = require('../middleware/encryption');
+const { generateSalt, hashPassword } = require('../utils/encryption');
 const faker = require('faker');
 
 const uuidv4 = require('uuid/v4');

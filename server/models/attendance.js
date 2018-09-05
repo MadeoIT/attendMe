@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     startTime: DataTypes.ARRAY(DataTypes.INTEGER),
     finishTime: DataTypes.ARRAY(DataTypes.INTEGER),
     timeZone: DataTypes.INTEGER,
-    timeAttendedMinutes: DataTypes.INTEGER //Turned into HOUR
+    timeAttended: DataTypes.INTEGER
   }, {
     hooks: {
       beforeCreate: attendanceHooks.beforeCreateAttendance,

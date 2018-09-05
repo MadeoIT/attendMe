@@ -14,7 +14,7 @@ module.exports = {
       startTime: Sequelize.ARRAY(Sequelize.INTEGER), 
       finishTime: Sequelize.ARRAY(Sequelize.INTEGER),
       timeZone: Sequelize.INTEGER,
-      timeAttendedMinutes: Sequelize.INTEGER,
+      timeAttended: Sequelize.INTEGER,
       tenantId: {
         type: Sequelize.INTEGER,
         onDelete: 'CASCADE',
