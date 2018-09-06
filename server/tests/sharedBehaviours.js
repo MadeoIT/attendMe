@@ -1,8 +1,13 @@
 const db = require('../models');
-const { createPayload, createToken } = require('../utils/token');
+const {
+  createPayload,
+  createToken
+} = require('../utils/token');
 const config = require('config');
-const { generateSalt, hashPassword } = require('../utils/encryption');
-const faker = require('faker');
+const {
+  generateSalt,
+  hashPassword
+} = require('../utils/encryption');
 
 const uuidv4 = require('uuid/v4');
 
@@ -21,7 +26,8 @@ exports.generateTokenAndCsrfToken = function (tenant) {
   const token = createToken(payload, tokenKey, tokenExp);
 
   return {
-    csrfToken, token
+    csrfToken,
+    token
   }
 };
 
@@ -29,9 +35,10 @@ exports.generateRefreshTokenAndCsrfToken = function (tenant) {
   const csrfToken = uuidv4();
   const payload = createPayload(tenant, csrfToken);
   const refreshToken = createToken(payload, refreshTokenKey, refreshTokenExp);
-  
+
   return {
-    csrfToken, refreshToken
+    csrfToken,
+    refreshToken
   }
 };
 
@@ -50,15 +57,54 @@ exports.generateTenant = async function (tenantObj) {
   });
 };
 
-exports.generateFakeTenantObj = function () {
-  return{
-    email: faker.internet.email(),
-    password: faker.internet.password(10)
-  }
-}
+exports.generateTenantObj = () => ({
+  email: 'email@email.com',
+  password: 'password',
 
-exports.generateFakeTodoObj = function () {
-  return{
-    content: faker.lorem.word()
-  }
-}
+  streetAddress: 'address 28 A',
+  postCode: '28103',
+  country: 'Finland',
+
+  firstName: 'name',
+  lastName: 'lastName',
+  userName: 'userName'
+});
+exports.generateTenantObjGoogle = () => ({
+  email: 'email@gmail.com',
+  googleId: 'googleId',
+
+  streetAddress: 'address 28 A',
+  postCode: '28103',
+  country: 'Finland',
+
+  firstName: 'name',
+  lastName: 'lastName',
+  userName: 'userName'
+});
+exports.generateTenantFromDb = () => ({
+  id: 1,
+  numberOfEmployes: 20
+});
+exports.generateAddressFromDb = (fk) => ({
+  id: 4,
+  tenantId: 1,
+  employeeId: fk ? 2 : null,
+  streetAddress: 'address 28 A',
+  postCode: '28103',
+  country: 'Finland'
+});
+exports.generateIdentityFromDb = (fk) => ({
+  id: 32,
+  tenantId: 1,
+  employeeId: fk ? 2 : null,
+  email: 'email@email.com',
+  password: 'password'
+});
+exports.generateUserInfoFromDb = (fk) => ({
+  id: 23,
+  tenantId: 1,
+  employeeId: fk ? 2 : null,
+  firstName: 'name',
+  lastName: 'lastName',
+  userName: 'userName'
+});

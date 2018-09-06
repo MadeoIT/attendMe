@@ -1,46 +1,40 @@
-const Joi = require('joi');
 const tenantDAO = require('../DAOs/tenantDAO');
-const { tenantSchema, tenantGoogleSchema } = require('../models/validationModels/tenantValidation');
-const { comparePassword } = require('../middleware/encryption');
+const identityDAO = require('../DAOs/identityDAO');
+const addressDAO = require('../DAOs/addressDAO');
+const userInfoDAO = require('../DAOs/userInfoDAO');
+const tenantDTO = require('../DTOs/tenantDTO');
+
+const { comparePassword } = require('../utils/encryption');
+
 const R = require('ramda');
-const { generateSalt, hashPassword } = require('../middleware/encryption');
 
 /**
  * Persist Tenant into the database
  * @param {Object} tenant 
- * @param {Function} getObject 
- * Create the tenant object, validate the tenant object, 
- * check if tenant already exist, persist the tenant
+ * @param {Function}
  */
 const saveTenant = async (tenant) => {
-  const result = Joi.validate(tenant, tenantSchema);
+  const { identityObj, addressObj, userInfoObj } = tenantDTO.tenantDTOtoTenant(tenant);
 
-  if (result.error) {
-    return {
-      result: false,
-      message: result.error.details[0].message
-    }
-  };
-
-  const foundTenant = await tenantDAO.findTenantByEmail(tenant.email);
+  const foundTenant = await tenantDAO.findTenantByEmail(identityObj.email);
 
   if (foundTenant) {
     return {
       result: false,
       message: 'Email already exist'
     }
-  }
+  };
 
-  const hashedPassword = await R.pipeP(
-    generateSalt,
-    hashPassword(tenant.password)
-  )();
+  const savedTenant = await tenantDAO.createTenant();
+  identityObj.tenantId = savedTenant.id;
+  addressObj.tenantId = savedTenant.id;
+  userInfoObj.tenantId = savedTenant.id;
 
-  const tenantObj = R.merge(tenant, {
-    password: hashedPassword
-  });
-
-  return await tenantDAO.createTenant(tenantObj);
+  return await Promise.all([
+    identityDAO.createIdentity(identityObj),
+    addressDAO.createAddress(addressObj),
+    userInfoDAO.createUserInfo(userInfoObj)
+  ]);
 };
 
 const saveTenantGoogle = async (tenant) => {

@@ -24,5 +24,5 @@ describe('Factory functions', () => {
     expect(newObject.sub).toBe(1);
     expect(newObject.name).toBe('pippo');
     expect(Object.keys(newObject).length).toBe(2);
-  })
+  });
 })

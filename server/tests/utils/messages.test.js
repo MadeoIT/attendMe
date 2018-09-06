@@ -1,10 +1,10 @@
 const { createEmailMessage, createTokenizedUrl } = require('../../utils/messages');
-const { generateFakeTenantObj } = require('../sharedBehaviours');
+const { generateTenantObj } = require('../sharedBehaviours');
 
 describe('messages', () => {
 
   it('should create an email object', () => {
-    const tenant = generateFakeTenantObj();
+    const tenant = generateTenantObj();
     const html = '<h1>Message</h1>';
     const messageObj = createEmailMessage('email@email.com', tenant.email, 'Message', html);
 

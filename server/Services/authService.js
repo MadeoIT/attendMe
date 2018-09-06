@@ -7,10 +7,10 @@ const { updateTenant, saveTenant, saveTenantGoogle } = require('../Services/tena
 const { 
   createEmailMessage, createTokenizedUrl, htmlResetPassword,
   htmlResetPasswordConfirm, htmlWelcome, htmlConfirmEmail
-} = require('../middleware/messages');
-const { sendNotification } = require('../middleware/notification');
-const { createToken, createPayload, createCookie } = require('../middleware/token');
-const { generateSalt, hashPassword } = require('../middleware/encryption');
+} = require('../utils/messages');
+const { sendNotification } = require('../utils/notification');
+const { createToken, createPayload, createCookie } = require('../utils/token');
+const { generateSalt, hashPassword } = require('../utils/encryption');
 
 //Config constants
 const tokenKey = config.get('encryption.jwtSk');
@@ -28,58 +28,6 @@ const rawUrl = R.pipe(
   createToken(_, confirmationTokenKey, confirmationTokenExp), 
   createTokenizedUrl
 );
-
-const resetPassowrd = async (req, res, next) => {
-  try {
-    const { user } = req;
-    const { password } = req.body;
-
-    if(password.length < 8) {
-      return res.status(400).send('Password must be at least 8 characters');
-    }
-
-    const hashedPassword = await R.pipeP(
-      generateSalt, 
-      hashPassword(password)
-    )();
-    
-    const tenant = await updateTenant({password: hashedPassword}, user.id);
-    
-    const message = createEmailMessage(
-      'password-reset@todo.com', 
-      tenant.email,
-      'Rest password',  
-      htmlResetPasswordConfirm(tenant)
-    );
-    await sendNotification('email')(message);
-   
-    res.status(200).send(tenant);
-
-  } catch (error) {
-    next(error);
-  }
-};
-
-const mailPasswordReset = async (req, res, next) => {
-  try {
-    const { user } = req;
-
-    const url = rawUrl(user)('login/password');
-    
-    const message = createEmailMessage(
-      'password-reset@todo.com', 
-      user.email,
-      'Rest password',  
-      htmlResetPassword(url)
-    );
-    await sendNotification('email')(message);
-    
-    res.status(200).send(user);
-
-  } catch (error) {
-    next(error);
-  }
-};
 
 const signup = async (req, res, next) => {
   try {
@@ -213,6 +161,58 @@ const relogin = (req, res) => {
 
   createTokensAndCookies(res, user, csrfToken)
   res.status(200).send({});
+};
+
+const resetPassowrd = async (req, res, next) => {
+  try {
+    const { user } = req;
+    const { password } = req.body;
+
+    if(password.length < 8) {
+      return res.status(400).send('Password must be at least 8 characters');
+    }
+
+    const hashedPassword = await R.pipeP(
+      generateSalt, 
+      hashPassword(password)
+    )();
+    
+    const tenant = await updateTenant({password: hashedPassword}, user.id);
+    
+    const message = createEmailMessage(
+      'password-reset@todo.com', 
+      tenant.email,
+      'Rest password',  
+      htmlResetPasswordConfirm(tenant)
+    );
+    await sendNotification('email')(message);
+   
+    res.status(200).send(tenant);
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+const mailPasswordReset = async (req, res, next) => {
+  try {
+    const { user } = req;
+
+    const url = rawUrl(user)('login/password');
+    
+    const message = createEmailMessage(
+      'password-reset@todo.com', 
+      user.email,
+      'Rest password',  
+      htmlResetPassword(url)
+    );
+    await sendNotification('email')(message);
+    
+    res.status(200).send(user);
+
+  } catch (error) {
+    next(error);
+  }
 };
 
 /**

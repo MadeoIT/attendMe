@@ -62,5 +62,18 @@ describe('Identity model integration', () => {
 
       expect(error.name).toEqual('SequelizeValidationError');
     }
-  })
+  });
+
+  it('throw an error password too short', async () => {
+    const identity = {
+      email: 'notAValidEmail.com',
+      password: '123'
+    }
+    try {
+      await db.Identity.create(identity);
+    } catch (error) {
+
+      expect(error.name).toEqual('SequelizeValidationError');
+    }
+  });
 })
