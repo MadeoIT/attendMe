@@ -9,7 +9,7 @@ const identityHooks = {
 
   beforeCreateIdentity: async (identity, options) => {
     if(identity.googleId || identity.facebookId) return;
-    if(!identity.password) throw new Error('Password is required');
+    if(!identity.password) throw { status: 400, message: 'Password is required'};
 
     const hashedPassword = await identityHooks.getHashedPassword(identity.password);
 

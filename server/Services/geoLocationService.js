@@ -1,7 +1,7 @@
 const R = require('ramda');
-const { createCookie } = require('../middleware/token');
+const { createCookie } = require('../utils/token');
 const { sendNotification } = require('../middleware/notification');
-const { createEmailMessage, htmlGeolocationMismatch } = require('../middleware/messages');
+const { createEmailMessage, htmlGeolocationMismatch } = require('../utils/messages');
 const COOCKIE_MAX_AGE = 14 * 24 * 60 * 60 * 1000; 
 const SAMPLE_DISTANCE = 100; //km
 

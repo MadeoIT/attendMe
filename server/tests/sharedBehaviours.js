@@ -47,15 +47,15 @@ exports.generateConfirmationToken = function (tenant) {
   return createToken(payload, confirmationTokenKey, confirmationTokenExp);
 }
 
-exports.generateTenant = async function (tenantObj) {
-  const salt = await generateSalt();
-  const hashedPassword = await hashPassword(tenantObj.password, salt);
-  return db.Tenant.create({
-    email: tenantObj.email,
-    password: hashedPassword,
-    confirmed: true
-  });
-};
+//exports.generateTenant = async function (tenantObj) {
+//  const salt = await generateSalt();
+//  const hashedPassword = await hashPassword(tenantObj.password, salt);
+//  return db.Tenant.create({
+//    email: tenantObj.email,
+//    password: hashedPassword,
+//    confirmed: true
+//  });
+//};
 
 exports.generateTenantObj = () => ({
   email: 'email@email.com',
@@ -71,15 +71,7 @@ exports.generateTenantObj = () => ({
 });
 exports.generateTenantObjGoogle = () => ({
   email: 'email@gmail.com',
-  googleId: 'googleId',
-
-  streetAddress: 'address 28 A',
-  postCode: '28103',
-  country: 'Finland',
-
-  firstName: 'name',
-  lastName: 'lastName',
-  userName: 'userName'
+  googleId: 'googleId'
 });
 exports.generateTenantFromDb = () => ({
   id: 1,
@@ -107,4 +99,23 @@ exports.generateUserInfoFromDb = (fk) => ({
   firstName: 'name',
   lastName: 'lastName',
   userName: 'userName'
+});
+exports.generateTenantObjFromDB = () => ({ 
+  confirmed: false,
+  blocked: false,
+  email: 'email@email.com',
+  updatedAt: '2018-09-11T08:32:41.849Z',
+  createdAt: '2018-09-11T08:32:41.849Z',
+  googleId: null,
+  facebookId: null,
+  lastName: 'lastName',
+  userName: 'userName',
+  firstName: null,
+  streetAddress: 'address 28 A',
+  postCode: '28103',
+  country: 'Finland',
+  type: null,
+  state: null,
+  isTenant: true,
+  id: 1 
 });

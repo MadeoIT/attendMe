@@ -16,40 +16,31 @@ const R = require('ramda');
 const saveTenant = async (tenant) => {
   const { identityObj, addressObj, userInfoObj } = tenantDTO.tenantDTOtoTenant(tenant);
 
-  const foundTenant = await tenantDAO.findTenantByEmail(identityObj.email);
+  //Todo: add validation
 
-  if (foundTenant) {
-    return {
-      result: false,
-      message: 'Email already exist'
-    }
-  };
+  const identity = await identityDAO.findIdentityByEmail(identityObj.email);
 
+  if (identity) throw { status: 400, message: 'Email already exist'};
+  
   const savedTenant = await tenantDAO.createTenant();
   identityObj.tenantId = savedTenant.id;
   addressObj.tenantId = savedTenant.id;
   userInfoObj.tenantId = savedTenant.id;
 
-  return await Promise.all([
+  const result = await Promise.all([
     identityDAO.createIdentity(identityObj),
-    addressDAO.createAddress(addressObj),
-    userInfoDAO.createUserInfo(userInfoObj)
+    userInfoDAO.createUserInfo(userInfoObj),
+    addressDAO.createAddress(addressObj)
   ]);
+  
+  return tenantDTO.tenantToTenantDTO( ...[].concat(result.map(data => data.toJSON())), 
+    savedTenant.toJSON()
+  );
 };
 
-const saveTenantGoogle = async (tenant) => {
-  const result = Joi.validate(tenant, tenantGoogleSchema);
 
-  if (result.error) return;
 
-  const foundTenant = await tenantDAO.findTenantByEmail(tenant.email);
 
-  if (foundTenant) return foundTenant;
-
-  tenant.confirmed = true;
-  const savedTenant = await tenantDAO.createTenant(tenant);
-  return savedTenant;
-}
 
 const updateTenant = async (tenant, id) => {
   const result = await tenantDAO.updateTenantById(tenant, id);
@@ -102,7 +93,6 @@ const checkTenantCredential = async (email, password, done) => {
 
 module.exports = {
   saveTenant,
-  saveTenantGoogle,
   checkTenantCredential,
   getTenantByEmail,
   updateTenant

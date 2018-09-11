@@ -19,7 +19,7 @@ describe('Tenant Data Transfer Object', () => {
     const address = mock.generateAddressFromDb(false);
     const tenant = mock.generateTenantFromDb(false);
     const combinedObj = tenantDTOs.tenantToTenantDTO(identity, userInfo, address, tenant);
-
+    
     expect(Object.keys(combinedObj)).toHaveLength(9);
     expect(combinedObj.password).toBeUndefined();
     expect(combinedObj.tenantId).toBeUndefined();

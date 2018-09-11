@@ -47,7 +47,7 @@ describe('Identity model integration', () => {
       await db.Identity.create(identity);
     } catch (error) {
 
-      expect(error).toEqual(new Error('Password is required'));
+      expect(error.message).toBe('Password is required');
     }
   });
 

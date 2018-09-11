@@ -3,12 +3,12 @@ const uuidv4 = require('uuid/v4');
 const R = require('ramda');
 
 //Functions
-const { updateTenant, saveTenant, saveTenantGoogle } = require('../Services/tenantService');
+const { updateTenant, saveTenant } = require('../Services/tenantService');
 const { 
   createEmailMessage, createTokenizedUrl, htmlResetPassword,
   htmlResetPasswordConfirm, htmlWelcome, htmlConfirmEmail
 } = require('../utils/messages');
-const { sendNotification } = require('../utils/notification');
+const { sendNotification } = require('../middleware/notification');
 const { createToken, createPayload, createCookie } = require('../utils/token');
 const { generateSalt, hashPassword } = require('../utils/encryption');
 
@@ -34,13 +34,9 @@ const signup = async (req, res, next) => {
     const { body } = req;
     
     const tenant = await saveTenant(body);
-
-    if(!tenant.result && tenant.message) {
-      return res.status(400).send(tenant.message);
-    };
-
+    
     const url = rawUrl(tenant)('signup/confirm');
-
+   
     const message = createEmailMessage(
       'confirm@todo.com', 
       tenant.email,
@@ -52,6 +48,11 @@ const signup = async (req, res, next) => {
     res.status(200).send(tenant);
 
   } catch (error) {
+    
+    if(!error.status === 400) {
+      return res.status(400).send(error.message);
+    };
+
     next(error);
   }
 };
@@ -64,7 +65,7 @@ const signupGoogle = async (req, res, next) => {
       email, googleId: id
     };
     
-    const tenant = await saveTenantGoogle(tenantObj)
+    const tenant = await saveTenant(tenantObj)
     req.user = tenant;
     next();
 

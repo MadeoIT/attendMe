@@ -20,9 +20,9 @@ module.exports = {
    */
   tenantToTenantDTO: R.curry((identityObj, userInfoObj, addressObj, tenantObj) => {
     return { 
-      ...R.omit(['password', 'id', 'tenantId', 'employeeId'], identityObj),
-      ...R.omit(['id', 'tenantId', 'employeeId'], userInfoObj), 
-      ...R.omit(['id', 'tenantId', 'employeeId'], addressObj), 
+      ...R.omit(['password', 'id', 'tenantId', 'employeeId', 'createdAt', 'updatedAt'], identityObj),
+      ...R.omit(['id', 'tenantId', 'employeeId', 'createdAt', 'updatedAt'], userInfoObj), 
+      ...R.omit(['id', 'tenantId', 'employeeId', 'createdAt', 'updatedAt'], addressObj), 
       ...tenantObj 
     }
   })

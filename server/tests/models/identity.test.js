@@ -42,7 +42,7 @@ describe('identity model', () => {
       await indentityHooks.beforeCreateIdentity(identity);
 
     } catch (error) {
-      expect(error).toEqual(new Error('Password is required'));
+      expect(error.message).toBe('Password is required');
       expect(indentityHooks.getHashedPassword).not.toHaveBeenCalled();
     }
   })
