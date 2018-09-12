@@ -33,18 +33,33 @@ const saveTenant = async (tenant) => {
     addressDAO.createAddress(addressObj)
   ]);
   
-  return tenantDTO.tenantToTenantDTO( ...[].concat(result.map(data => data.toJSON())), 
+  return tenantDTO.tenantToTenantDTO( 
+    ...[].concat(result.map(data => data.toJSON())), 
     savedTenant.toJSON()
   );
 };
 
+/**
+ * Update tenant associated properties
+ * @param {Object} tenant 
+ * @param {Number} tenantId 
+ */
+const updateTenant = async (tenant, tenantId) => {
+  const { identityObj, addressObj, userInfoObj } = tenantDTO.tenantDTOtoTenant(tenant);
 
-
-
-
-const updateTenant = async (tenant, id) => {
-  const result = await tenantDAO.updateTenantById(tenant, id);
-  return result[1][0]; //Postgre returning object
+  const result = await Promise.all([
+    identityDAO.updateIdentityByTenantId(identityObj, tenantId),
+    userInfoDAO.updateUserInfoByTenantId(userInfoObj, tenantId),
+    addressDAO.updateAddressByTenantId(addressObj, tenantId),
+    tenantDAO.findTenantById(tenantId)
+  ])
+  
+  return tenantDTO.tenantToTenantDTO(
+    result[0][1][0].toJSON(),
+    result[1][1][0].toJSON(),
+    result[2][1][0].toJSON(),
+    result[3].toJSON()
+  )
 };
 
 /**
@@ -53,13 +68,24 @@ const updateTenant = async (tenant, id) => {
  * @param {Function} done 
  * This function is used by passportJs middleware
  */
-const getTenantByEmail = async (email, done) => {
+const getTenantByEmail = async (payload, done) => {
   try {
+    const tenantId = payload.id;
+    const identity = await identityDAO.findIdentityByEmail(payload.email);
+    
+    if (!identity) return done({ status: 404, message: 'Email does not exist' }, false);
 
-    const tenant = await tenantDAO.findTenantByEmail(email);
+    const result = await Promise.all([
+      userInfoDAO.findUserInfoByTenantId(tenantId),
+      addressDAO.findAddressByTenantId(tenantId),
+      tenantDAO.findTenantById(tenantId)
+    ]);
 
-    if (!tenant) return done({ status: 404, message: 'Email does not exist' }, false);
-
+    const tenant = tenantDTO.tenantToTenantDTO(
+      identity.toJSON(),
+      ...[].concat(result.map(data => data.toJSON()))
+    )
+    
     return done(null, tenant);
 
   } catch (error) {

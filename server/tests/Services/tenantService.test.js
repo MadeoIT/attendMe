@@ -1,6 +1,6 @@
 const {
   checkTenantCredential,
-  saveTenant
+  saveTenant, updateTenant
 } = require('../../Services/tenantService');
 const mock = require('../sharedBehaviours');
 const {

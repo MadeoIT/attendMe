@@ -57,6 +57,27 @@ const signup = async (req, res, next) => {
   }
 };
 
+const confirmAccount = async (req, res, next) => {
+  try {
+    const { user } = req;
+
+    const tenant = await updateTenant({confirmed: true}, user.id);
+    
+    const message = createEmailMessage(
+      'confirm@todo.com', 
+      tenant.email,
+      'Confirm email',  
+      htmlWelcome(tenant)
+    );
+    await sendNotification('email')(message);
+
+    res.status(200).send(tenant);
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 const signupGoogle = async (req, res, next) => {
   try {
     const { id, emails } = req.user;
@@ -93,27 +114,6 @@ const resendConfirmationEmail = async (req, res, next) => {
     next(error)
   }
 }
-
-const confirmAccount = async (req, res, next) => {
-  try {
-    const { user } = req;
-
-    const tenant = await updateTenant({confirmed: true}, user.id);
-
-    const message = createEmailMessage(
-      'confirm@todo.com', 
-      tenant.email,
-      'Confirm email',  
-      htmlWelcome(tenant)
-    );
-    await sendNotification('email')(message);
-
-    res.status(200).send(tenant);
-
-  } catch (error) {
-    next(error);
-  }
-};
 
 const createTokensAndCookies = (res, user, csrfToken) => {
   const rawToken = R.pipe(

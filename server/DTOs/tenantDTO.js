@@ -8,7 +8,7 @@ module.exports = {
    */
   tenantDTOtoTenant: (tenant) => {
     return {
-      identityObj: R.pick(['email', 'password', 'googleId', 'facebookId'], tenant) ,
+      identityObj: R.pick(['email', 'password', 'googleId', 'facebookId', 'confirmed'], tenant) ,
       userInfoObj: R.pick(['firsName', 'lastName', 'userName'], tenant),
       addressObj: R.pick(['type', 'streetAddress', 'postCode', 'country', 'state'], tenant),
       tenantObj: {} 

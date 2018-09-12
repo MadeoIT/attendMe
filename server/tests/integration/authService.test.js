@@ -1,6 +1,7 @@
 const db = require('../../models');
 const request = require('supertest');
 const mock = require('../sharedBehaviours');
+const tenantService = require('../../Services/tenantService');
 let notification = require('../../middleware/notification');
 
 describe('auth service integration', () => {
@@ -31,5 +32,20 @@ describe('auth service integration', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.email).toBe(savedIdentity.email);
+    expect(res.body.password).toBeUndefined();
+  });
+
+  it('should confirm a tenant', async () => {
+    const tenant = mock.generateTenantObj();
+    const savedTenant = await tenantService.saveTenant(tenant);
+    const tokenId = mock.generateConfirmationToken(savedTenant);
+    const res = await request(server)
+      .get(`${baseUrl}/signup/${tokenId}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.confirmed).toBe(true);
+    expect(res.body.id).toBe(savedTenant.id);
+    expect(res.body.email).toBe(tenant.email);
+    expect(res.body.password).toBeUndefined();
   })
 })
