@@ -78,14 +78,6 @@ const confirmAccount = async (req, res, next) => {
   }
 };
 
-const login = (req, res) => {
-  const { user } = req;
-  const csrfToken = uuidv4();
-
-  createTokensAndCookies(res, user, csrfToken);
-  res.status(200).send({csrfToken, ...user});
-};
-
 const signupGoogle = async (req, res, next) => {
   try {
     const { id, emails } = req.user;
@@ -121,49 +113,33 @@ const resendConfirmationEmail = async (req, res, next) => {
   } catch (error) {
     next(error)
   }
-}
-
-const createTokensAndCookies = (res, user, csrfToken) => {
-  const rawToken = R.pipe(
-    createPayload(_, csrfToken),
-    createToken, 
-  )(user);
-
-  const token = rawToken(tokenKey, tokenExp);
-  const refreshToken = rawToken(refreshTokenKey, refreshTokenExp);
-  
-  createCookie(res, 'token', token, COOKIE_MAX_AGE);
-  createCookie(res, 'refresh-token', refreshToken, COOKIE_MAX_AGE);
-}
-
-
-
-const loginGoogle = (req, res, next) => {
-  const { user } = req;
-  const csrfToken = uuidv4();
-
-  createTokensAndCookies(res, user, csrfToken);
-  req.csrfToken = csrfToken
-  next();
 };
 
 /**
- * Send new token
+ * Send an email message with the reset password link
  * @param {*} req 
  * @param {*} res 
- * Check if the csrf token exist otherwise it will create a payload with undefined token
- * and it will always be authorized
+ * @param {*} next 
  */
-const relogin = (req, res) => {
-  const { user } = req;
-  const csrfToken = req.headers['csrf-token'];
+const mailPasswordReset = async (req, res, next) => {
+  try {
+    const { user } = req;
 
-  if(!csrfToken){
-    return res.status(401).send({});
-  };
+    const url = rawUrl(user)('login/password');
+    
+    const message = createEmailMessage(
+      'password-reset@todo.com', 
+      user.email,
+      'Rest password',  
+      htmlResetPassword(url)
+    );
+    await sendNotification('email')(message);
+    
+    res.status(200).send(user);
 
-  createTokensAndCookies(res, user, csrfToken)
-  res.status(200).send({});
+  } catch (error) {
+    next(error);
+  }
 };
 
 const resetPassowrd = async (req, res, next) => {
@@ -197,25 +173,59 @@ const resetPassowrd = async (req, res, next) => {
   }
 };
 
-const mailPasswordReset = async (req, res, next) => {
-  try {
-    const { user } = req;
+/**
+ * Generate Tokens and attach it to the response via cookie
+ * @param {*} res 
+ * @param {*} user 
+ * @param {*} csrfToken 
+ */
+const createTokensAndCookies = (res, user, csrfToken) => {
+  const rawToken = R.pipe(
+    createPayload(_, csrfToken),
+    createToken, 
+  )(user);
 
-    const url = rawUrl(user)('login/password');
-    
-    const message = createEmailMessage(
-      'password-reset@todo.com', 
-      user.email,
-      'Rest password',  
-      htmlResetPassword(url)
-    );
-    await sendNotification('email')(message);
-    
-    res.status(200).send(user);
+  const token = rawToken(tokenKey, tokenExp);
+  const refreshToken = rawToken(refreshTokenKey, refreshTokenExp);
+  
+  createCookie(res, 'token', token, COOKIE_MAX_AGE);
+  createCookie(res, 'refresh-token', refreshToken, COOKIE_MAX_AGE);
+}
 
-  } catch (error) {
-    next(error);
-  }
+const login = (req, res) => {
+  const { user } = req;
+  const csrfToken = uuidv4();
+
+  createTokensAndCookies(res, user, csrfToken);
+  res.status(200).send({csrfToken, ...user});
+};
+
+const loginGoogle = (req, res, next) => {
+  const { user } = req;
+  const csrfToken = uuidv4();
+
+  createTokensAndCookies(res, user, csrfToken);
+  req.csrfToken = csrfToken
+  next();
+};
+
+/**
+ * Send new token
+ * @param {*} req 
+ * @param {*} res 
+ * Check if the csrf token exist otherwise it will create a payload with undefined token
+ * and it will always be authorized
+ */
+const relogin = (req, res) => {
+  const { user } = req;
+  const csrfToken = req.headers['csrf-token'];
+
+  if(!csrfToken){
+    return res.status(401).send({});
+  };
+
+  createTokensAndCookies(res, user, csrfToken)
+  res.status(200).send({});
 };
 
 /**

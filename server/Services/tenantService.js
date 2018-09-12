@@ -73,12 +73,13 @@ const updateTenant = async (tenant, tenantId) => {
  * @param {Function} done passportJs function done(error, object)
  * This function is used by passportJs middleware
  */
-const getTenantByEmail = async (payload, done) => {
+const getTenantByEmail = async (email, done) => {
   try {
-    const tenantId = payload.id;
-    const identity = await identityDAO.findIdentityByEmail(payload.email);
+    const identity = await identityDAO.findIdentityByEmail(email);
     
     if (!identity) return done({ status: 404, message: 'Email does not exist' }, false);
+
+    const { tenantId } = identity;
 
     const result = await Promise.all([
       userInfoDAO.findUserInfoByTenantId(tenantId),

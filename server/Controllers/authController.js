@@ -20,13 +20,13 @@ router.post('/api/auth/logout', isValid('jwt'), authService.logout);
 //Check is the refresh token is valid and give back a new token
 router.post('/api/auth/relogin', isValid('jwt-refresh'), authService.relogin);
 
-//Password reset / Send message
+//TODO: Password reset / Send message
 router.post('/api/auth/password', isValid('email'), authService.mailPasswordReset);
 
-//Password reset / Save new passowrd
+//TODO: Password reset / Save new passowrd
 router.post('/api/auth/password/:tokenId', isValid('jwt-confirm'), authService.resetPassowrd);
 
-//Sign up a new tenant with Google Auth
+//TODO: Sign up a new tenant with Google Auth
 router.get('/auth/google', googleScope);
 router.get(
   '/auth/google/callback', 

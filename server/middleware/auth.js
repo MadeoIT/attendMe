@@ -82,7 +82,9 @@ const options = {
  */
 const jwtOptionalStrategyBuilder = (strategyType) => {
   return new JwtStrategy(options[strategyType], async(_, payload, done) => {
-    await getTenantByEmail(payload, done);
+    const { email } = payload;
+
+    await getTenantByEmail(email, done);
   });
 };
 
