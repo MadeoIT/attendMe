@@ -36,17 +36,18 @@ describe('auth service integration', () => {
   });
 
   describe('After Signup', () => {
-    let tenant, savedTenant, tokenId
+    let tenant, savedTenant, confirmationToken, tokens;
 
     beforeEach(async () => {
       tenant = mock.generateTenantObj();
       savedTenant = await tenantService.saveTenant(tenant);
-      tokenId = mock.generateConfirmationToken(savedTenant);
+      confirmationToken = mock.generateConfirmationToken(savedTenant);
+      tokens = mock.generateTokenAndCsrfToken(savedTenant)
     })
 
     it('should confirm a tenant', async () => {
       const res = await request(server)
-        .get(`${baseUrl}/signup/${tokenId}`);
+        .get(`${baseUrl}/signup/${confirmationToken}`);
   
       expect(res.status).toBe(200);
       expect(res.body.confirmed).toBe(true);
@@ -73,6 +74,16 @@ describe('auth service integration', () => {
         .send({ password: 'wrongPassword', email: tenant.email });
   
       expect(res.status).toBe(401);
-    })
+    });
+
+    it('should log tenant out', async () => {
+      const res = await request(server)
+        .post(`${baseUrl}/logout`)
+        .set('csrf-token', tokens.csrfToken)
+        .set('Cookie', `token=${tokens.token}`)
+
+      expect(res.status).toBe(200);
+      expect(res.header['set-cookie'][0]).toContain('Max-Age=0');
+    });
   })
 })

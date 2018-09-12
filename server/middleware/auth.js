@@ -54,6 +54,7 @@ const email = new LocalStrategy(localEmailOption, async(username, _, done) => {
 //Check if token is valid and compare it with csrf token
 const jwtAuth = new JwtStrategy(jwtOption, async(req, payload, done) => {
   const csrfToken = req.headers['csrf-token'];
+
   if(csrfToken !== payload.csrfToken) return done(null, false); //verify csrf token
 
   return done(null, payload);
