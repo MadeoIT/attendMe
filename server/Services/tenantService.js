@@ -12,6 +12,8 @@ const R = require('ramda');
  * Persist Tenant into the database
  * @param {Object} tenant 
  * @param {Function}
+ * Return value from a create method in sequelize is a full entity
+ * toJSON transform the entity in the data that we need
  */
 const saveTenant = async (tenant) => {
   const { identityObj, addressObj, userInfoObj } = tenantDTO.tenantDTOtoTenant(tenant);
@@ -43,6 +45,9 @@ const saveTenant = async (tenant) => {
  * Update tenant associated properties
  * @param {Object} tenant 
  * @param {Number} tenantId 
+ * result[0] is the first obj coming from the Promise.all 
+ * result[0][1][0] is the way to access the special "returning obj" provided by PostGres
+ * after update operation
  */
 const updateTenant = async (tenant, tenantId) => {
   const { identityObj, addressObj, userInfoObj } = tenantDTO.tenantDTOtoTenant(tenant);
@@ -64,8 +69,8 @@ const updateTenant = async (tenant, tenantId) => {
 
 /**
  * It check whether the tenant exist in the database
- * @param {String} email 
- * @param {Function} done 
+ * @param {Object} payload payload from token 
+ * @param {Function} done passportJs function done(error, object)
  * This function is used by passportJs middleware
  */
 const getTenantByEmail = async (payload, done) => {
@@ -84,7 +89,7 @@ const getTenantByEmail = async (payload, done) => {
     const tenant = tenantDTO.tenantToTenantDTO(
       identity.toJSON(),
       ...[].concat(result.map(data => data.toJSON()))
-    )
+    );
     
     return done(null, tenant);
 
@@ -102,13 +107,27 @@ const getTenantByEmail = async (payload, done) => {
  */
 const checkTenantCredential = async (email, password, done) => {
   try {
-    const tenant = await tenantDAO.findTenantByEmailAndConfirmed(email);
+    const identity = await identityDAO.findIdentityByEmail(email);
 
-    if (!tenant) return done({ status: 401, message: 'Invalid email or password' }, false)
+    if (!identity) return done({ status: 401, message: 'Invalid email or password' }, false)
 
-    const res = await comparePassword(password, tenant.password);
+    const doesPasswordMatch = await comparePassword(password, identity.password);
 
-    if (!res) return done({ status: 401, message: 'Invalid email or passoword' }, false);
+    if (!doesPasswordMatch) return done({ status: 401, message: 'Invalid email or passoword' }, false);
+
+    const { tenantId } = identity;
+
+    const result = await Promise.all([
+      userInfoDAO.findUserInfoByTenantId(tenantId),
+      addressDAO.findAddressByTenantId(tenantId),
+      tenantDAO.findTenantById(tenantId)
+    ]);
+
+    const tenant = tenantDTO.tenantToTenantDTO(
+      identity.toJSON(),
+      ...[].concat(result.map(data => data.toJSON()))
+    );
+
     return done(null, tenant);
 
   } catch (error) {

@@ -35,17 +35,44 @@ describe('auth service integration', () => {
     expect(res.body.password).toBeUndefined();
   });
 
-  it('should confirm a tenant', async () => {
-    const tenant = mock.generateTenantObj();
-    const savedTenant = await tenantService.saveTenant(tenant);
-    const tokenId = mock.generateConfirmationToken(savedTenant);
-    const res = await request(server)
-      .get(`${baseUrl}/signup/${tokenId}`);
+  describe('After Signup', () => {
+    let tenant, savedTenant, tokenId
 
-    expect(res.status).toBe(200);
-    expect(res.body.confirmed).toBe(true);
-    expect(res.body.id).toBe(savedTenant.id);
-    expect(res.body.email).toBe(tenant.email);
-    expect(res.body.password).toBeUndefined();
+    beforeEach(async () => {
+      tenant = mock.generateTenantObj();
+      savedTenant = await tenantService.saveTenant(tenant);
+      tokenId = mock.generateConfirmationToken(savedTenant);
+    })
+
+    it('should confirm a tenant', async () => {
+      const res = await request(server)
+        .get(`${baseUrl}/signup/${tokenId}`);
+  
+      expect(res.status).toBe(200);
+      expect(res.body.confirmed).toBe(true);
+      expect(res.body.id).toBe(savedTenant.id);
+      expect(res.body.email).toBe(tenant.email);
+      expect(res.body.password).toBeUndefined();
+    });
+  
+    it('should log tenant in', async () => {
+      const res = await request(server)
+        .post(`${baseUrl}/login`)
+        .send({ password: tenant.password, email: tenant.email });
+  
+      expect(res.status).toBe(200);
+      expect(res.header['set-cookie'][0]).toContain('token');
+      expect(typeof res.body.csrfToken).toBe('string');
+      expect(res.body.email).toBe(tenant.email);
+      expect(res.body.password).toBeUndefined();
+    });
+  
+    it('should not log tenant in / wrong password', async () => {
+      const res = await request(server)
+        .post(`${baseUrl}/login`)
+        .send({ password: 'wrongPassword', email: tenant.email });
+  
+      expect(res.status).toBe(401);
+    })
   })
 })

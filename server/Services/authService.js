@@ -78,6 +78,14 @@ const confirmAccount = async (req, res, next) => {
   }
 };
 
+const login = (req, res) => {
+  const { user } = req;
+  const csrfToken = uuidv4();
+
+  createTokensAndCookies(res, user, csrfToken);
+  res.status(200).send({csrfToken, ...user});
+};
+
 const signupGoogle = async (req, res, next) => {
   try {
     const { id, emails } = req.user;
@@ -128,13 +136,7 @@ const createTokensAndCookies = (res, user, csrfToken) => {
   createCookie(res, 'refresh-token', refreshToken, COOKIE_MAX_AGE);
 }
 
-const login = (req, res) => {
-  const { user } = req;
-  const csrfToken = uuidv4();
 
-  createTokensAndCookies(res, user, csrfToken);
-  res.status(200).send({csrfToken, id: user.id, email: user.email});
-};
 
 const loginGoogle = (req, res, next) => {
   const { user } = req;

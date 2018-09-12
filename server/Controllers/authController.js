@@ -1,19 +1,18 @@
 const router = require('express').Router();
 const { isValid, googleScope } = require('../middleware/auth');
 const authService = require('../Services/authService');
-const { geolocationService } = require('../Services/geoLocationService');
 
 //Signup a new tenant and send confirmation email
 router.post('/api/auth/signup', authService.signup);
 
-//Resend confirmation email
+//TODO: Resend confirmation email
 router.post('/api/auth/signup/resend', isValid('email'), authService.resendConfirmationEmail)
 
 //Confirm account
 router.get('/api/auth/signup/:tokenId', isValid('jwt-confirm'), authService.confirmAccount);
 
 //Login and give back a token
-router.post('/api/auth/login', isValid('local'), geolocationService, authService.login);
+router.post('/api/auth/login', isValid('local'), authService.login);
 
 //Logout
 router.post('/api/auth/logout', isValid('jwt'), authService.logout);
