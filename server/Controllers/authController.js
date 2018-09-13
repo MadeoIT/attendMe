@@ -20,7 +20,7 @@ router.post('/api/auth/logout', isValid('jwt'), authService.logout);
 //Check is the refresh token is valid and give back a new token
 router.post('/api/auth/relogin', isValid('jwt-refresh'), authService.relogin);
 
-//TODO: Password reset / Send message
+//Password reset / Send message
 router.post('/api/auth/password', isValid('email'), authService.mailPasswordReset);
 
 //TODO: Password reset / Save new passowrd

@@ -85,5 +85,15 @@ describe('auth service integration', () => {
       expect(res.status).toBe(200);
       expect(res.header['set-cookie'][0]).toContain('Max-Age=0');
     });
+
+    it('should send email to reset password', async () => {
+      const res = await request(server)
+        .post(`${baseUrl}/password`)
+        .send({email: tenant.email})
+
+      expect(res.status).toBe(200);
+      expect(res.body.email).toBe(tenant.email);
+      expect(res.body.id).toBe(savedTenant.id);
+    })
   })
 })

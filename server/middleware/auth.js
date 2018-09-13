@@ -46,7 +46,7 @@ const login = new LocalStrategy(localOption, async(username, password, done) => 
   await checkTenantCredential(username, password, done);
 });
 
-//Check if tenant email is valid
+//Check if tenant email is valid. "username" is equal to "email", see the config object
 const email = new LocalStrategy(localEmailOption, async(username, _, done) => {
   await getTenantByEmail(username, done);
 });
