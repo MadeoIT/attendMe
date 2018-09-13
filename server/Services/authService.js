@@ -10,7 +10,7 @@ const {
 } = require('../utils/messages');
 const { sendNotification } = require('../middleware/notification');
 const { createToken, createPayload, createCookie } = require('../utils/token');
-const { generateSalt, hashPassword } = require('../utils/encryption');
+const identityDAO = require('../DAOs/identityDAO');
 
 //Config constants
 const tokenKey = config.get('encryption.jwtSk');
@@ -82,11 +82,18 @@ const signupGoogle = async (req, res, next) => {
   try {
     const { id, emails } = req.user;
     const email = emails[0].value;
-    const tenantObj = {
-      email, googleId: id
-    };
     
-    const tenant = await saveTenant(tenantObj)
+    const foundIdentity = await identityDAO.findIdentityByEmail(email);
+
+    if(foundIdentity) return next();
+
+    const tenantObj = {
+      googleId: id,
+      email
+    }
+    
+    const tenant = await saveTenant(tenantObj);
+
     req.user = tenant;
     next();
 

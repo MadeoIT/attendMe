@@ -23,10 +23,10 @@ router.post('/api/auth/relogin', isValid('jwt-refresh'), authService.relogin);
 //Password reset / Send message
 router.post('/api/auth/password', isValid('email'), authService.mailPasswordReset);
 
-//TODO: Password reset / Save new passowrd
+//Password reset / Save new passowrd
 router.post('/api/auth/password/:tokenId', isValid('jwt-confirm'), authService.resetPassowrd);
 
-//TODO: Sign up a new tenant with Google Auth
+//Sign up a new tenant with Google Auth
 router.get('/auth/google', googleScope);
 router.get(
   '/auth/google/callback', 

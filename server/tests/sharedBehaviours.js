@@ -70,8 +70,10 @@ exports.generateTenantObj = () => ({
   userName: 'userName'
 });
 exports.generateTenantObjGoogle = () => ({
-  email: 'email@gmail.com',
-  googleId: 'googleId'
+  id: '123',
+  emails: [{
+    value: 'gioioso.matteo@gmail.com'
+  }]
 });
 exports.generateTenantFromDb = () => ({
   id: 1,
@@ -100,7 +102,7 @@ exports.generateUserInfoFromDb = (fk) => ({
   lastName: 'lastName',
   userName: 'userName'
 });
-exports.generateTenantObjFromDB = () => ({ 
+exports.generateTenantObjFromDB = () => ({
   confirmed: false,
   blocked: false,
   email: 'email@email.com',
@@ -117,5 +119,5 @@ exports.generateTenantObjFromDB = () => ({
   type: null,
   state: null,
   isTenant: true,
-  id: 1 
+  id: 1
 });
