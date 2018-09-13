@@ -142,21 +142,20 @@ const mailPasswordReset = async (req, res, next) => {
   }
 };
 
+/**
+ * Update tenant passwords
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
 const resetPassowrd = async (req, res, next) => {
   try {
     const { user } = req;
     const { password } = req.body;
 
-    if(password.length < 8) {
-      return res.status(400).send('Password must be at least 8 characters');
-    }
+    //TODO: add validation
 
-    const hashedPassword = await R.pipeP(
-      generateSalt, 
-      hashPassword(password)
-    )();
-    
-    const tenant = await updateTenant({password: hashedPassword}, user.id);
+    const tenant = await updateTenant({password}, user.id);
     
     const message = createEmailMessage(
       'password-reset@todo.com', 

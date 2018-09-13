@@ -14,6 +14,17 @@ const identityHooks = {
     const hashedPassword = await identityHooks.getHashedPassword(identity.password);
 
     identity.password = hashedPassword;
+  },
+
+  beforeUpdateIdentity: async (identity, options) => {
+    if(identity.googleId || identity.facebookId) {
+      throw { status: 400, message: 'You cannot update password for this email' }
+    };
+    if(!identity.password) throw { status: 400, message: 'Password is required'};
+
+    const hashedPassword = await identityHooks.getHashedPassword(identity.password);
+
+    identity.password = hashedPassword;
   }
 }
 

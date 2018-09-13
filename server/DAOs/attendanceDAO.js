@@ -1,9 +1,9 @@
 const db = require('../models');
 
 module.exports = {
-  updateAttendanceByIdAndEmployeeIdAndByTenantId: async (attendanceObj, id, employeeId, tenantId) => {
+  updateAttendanceByEmployeeIdAndByTenantId: async (attendanceObj, employeeId, tenantId) => {
     const attendance = await db.Attendance.find({ where: {
-      id, employeeId, tenantId
+      employeeId, tenantId
     }});
     return attendance.update(attendanceObj);
   },

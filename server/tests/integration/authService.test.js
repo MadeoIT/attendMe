@@ -94,6 +94,17 @@ describe('auth service integration', () => {
       expect(res.status).toBe(200);
       expect(res.body.email).toBe(tenant.email);
       expect(res.body.id).toBe(savedTenant.id);
+    });
+
+    it('should reset password', async () => {
+      const res = await request(server)
+        .post(`${baseUrl}/password/${confirmationToken}`)
+        .send({password: 'newPassword'});
+      
+      expect(res.status).toBe(200);
+      expect(res.body.password).toBeUndefined();
+      expect(res.body.id).toBe(savedTenant.id);
+      expect(res.body.email).toBe(tenant.email);
     })
   })
 })

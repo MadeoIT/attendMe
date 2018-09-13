@@ -30,7 +30,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     hooks: {
-      beforeCreate: identityHooks.beforeCreateIdentity
+      beforeCreate: identityHooks.beforeCreateIdentity,
+      beforeUpdate: identityHooks.beforeUpdateIdentity
     }
   });
   Identity.associate = function (models) {

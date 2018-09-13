@@ -76,4 +76,17 @@ describe('Identity model integration', () => {
       expect(error.name).toEqual('SequelizeValidationError');
     }
   });
+
+  it('should reset password on update', async () => {
+    const identity = await db.Identity.create({
+      email: 'some@email.com',
+      password: PASSWORD
+    });
+
+    const res = await identity.update({
+      password: 'newPassword'
+    });
+
+    expect(encryption.comparePassword('newPassword', res.password)).toBeTruthy();
+  })
 })
