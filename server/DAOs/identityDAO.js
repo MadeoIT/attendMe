@@ -5,11 +5,13 @@ module.exports = {
     where: { email }
   }),
   findIdentityByTenantId: (tenantId) => db.Identity.find({
-    where: { tenantId }
+    where: { tenantId, employeeId: null }
   }),
   createIdentity: (identityObj) => db.Identity.create(identityObj),
-  updateIdentityByTenantId: (identityObj, tenantId) => db.Identity.update(identityObj, {
-    where: { tenantId },
-    returning: true
-  })
+  updateIdentityByTenantId: async (identityObj, tenantId) => {
+    const identity = await db.Identity.find({
+      where: { tenantId, employeeId: null }
+    });
+    return identity.update(identityObj);
+  }
 }

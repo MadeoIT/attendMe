@@ -6,8 +6,6 @@ const tenantDTO = require('../DTOs/tenantDTO');
 
 const { comparePassword } = require('../utils/encryption');
 
-const R = require('ramda');
-
 /**
  * Persist Tenant into the database
  * @param {Object} tenant 
@@ -57,14 +55,14 @@ const updateTenant = async (tenant, tenantId) => {
     userInfoDAO.updateUserInfoByTenantId(userInfoObj, tenantId),
     addressDAO.updateAddressByTenantId(addressObj, tenantId),
     tenantDAO.findTenantById(tenantId)
-  ])
+  ]);
   
   return tenantDTO.tenantToTenantDTO(
-    result[0][1][0].toJSON(),
+    result[0].toJSON(),
     result[1][1][0].toJSON(),
     result[2][1][0].toJSON(),
     result[3].toJSON()
-  )
+  );
 };
 
 /**

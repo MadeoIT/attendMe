@@ -5,7 +5,7 @@ const authService = require('../Services/authService');
 //Signup a new tenant and send confirmation email
 router.post('/api/auth/signup', authService.signup);
 
-//TODO: Resend confirmation email
+//Resend confirmation email
 router.post('/api/auth/signup/resend', isValid('email'), authService.resendConfirmationEmail)
 
 //Confirm account

@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     Tenant.hasMany(models.Employee, {
       foreignKey: 'tenantId'
     });
-    Tenant.hasMany(models.Address, {
+    Tenant.hasOne(models.Address, {
       foreignKey: 'tenantId'
     });
   };
