@@ -6,6 +6,24 @@ const tenantDTO = require('../DTOs/tenantDTO');
 
 const { comparePassword } = require('../utils/encryption');
 
+const getTenant = async (req, res, next) => {
+  try {
+    const { user } = req;
+    const foundTenant = await tenantDAO.findTenantByIdJoin(user.id);
+   
+    const tenant = tenantDTO.tenantToTenantDTO(
+      foundTenant.Identity.toJSON(), 
+      foundTenant.UserInfo.toJSON(), 
+      foundTenant.Address.toJSON(), 
+      foundTenant.toJSON()
+    );
+
+    res.status(200).send(tenant);
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * Persist Tenant into the database
  * @param {Object} tenant 
@@ -79,17 +97,15 @@ const getTenantByEmail = async (email, done) => {
 
     const { tenantId } = identity;
 
-    const result = await Promise.all([
-      userInfoDAO.findUserInfoByTenantId(tenantId),
-      addressDAO.findAddressByTenantId(tenantId),
-      tenantDAO.findTenantById(tenantId)
-    ]);
-
+    const foundTenant = await tenantDAO.findTenantByIdJoin(tenantId);
+   
     const tenant = tenantDTO.tenantToTenantDTO(
       identity.toJSON(),
-      ...[].concat(result.map(data => data.toJSON()))
+      foundTenant.UserInfo.toJSON(), 
+      foundTenant.Address.toJSON(), 
+      foundTenant.toJSON()
     );
-    
+
     return done(null, tenant);
 
   } catch (error) {
@@ -116,15 +132,13 @@ const checkTenantCredential = async (email, password, done) => {
 
     const { tenantId } = identity;
 
-    const result = await Promise.all([
-      userInfoDAO.findUserInfoByTenantId(tenantId),
-      addressDAO.findAddressByTenantId(tenantId),
-      tenantDAO.findTenantById(tenantId)
-    ]);
-
+    const foundTenant = await tenantDAO.findTenantByIdJoin(tenantId);
+   
     const tenant = tenantDTO.tenantToTenantDTO(
       identity.toJSON(),
-      ...[].concat(result.map(data => data.toJSON()))
+      foundTenant.UserInfo.toJSON(), 
+      foundTenant.Address.toJSON(), 
+      foundTenant.toJSON()
     );
 
     return done(null, tenant);
@@ -136,6 +150,7 @@ const checkTenantCredential = async (email, password, done) => {
 
 
 module.exports = {
+  getTenant,
   saveTenant,
   checkTenantCredential,
   getTenantByEmail,

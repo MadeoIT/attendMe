@@ -12,5 +12,11 @@ module.exports = {
       id: tenantId
     },
     returning: true
+  }),
+  findTenantByIdJoin: (tenantId) => db.Tenant.findOne({
+    where: {
+      id: tenantId
+    },
+    include: [db.Identity, db.Address, db.UserInfo]
   })
 }

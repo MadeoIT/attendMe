@@ -23,7 +23,7 @@ module.exports = {
       ...R.omit(['password', 'id', 'tenantId', 'employeeId', 'createdAt', 'updatedAt'], identityObj),
       ...R.omit(['id', 'tenantId', 'employeeId', 'createdAt', 'updatedAt'], userInfoObj), 
       ...R.omit(['id', 'tenantId', 'employeeId', 'createdAt', 'updatedAt'], addressObj), 
-      ...tenantObj 
+      ...R.pick(['isTenant', 'numberOfEmployes', 'createdAt', 'updatedAt', 'id'], tenantObj)
     }
   })
 }
