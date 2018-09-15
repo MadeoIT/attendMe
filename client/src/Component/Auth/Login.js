@@ -19,14 +19,14 @@ export class Login extends React.Component {
     }
   }
 
-  async componentDidMount() {
-    try {
-      const geolocation = await getGeolocation();
-      localStorage.setItem('geolocation', geolocation);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  //async componentDidMount() {
+  //  try {
+  //    const geolocation = await getGeolocation();
+  //    localStorage.setItem('geolocation', geolocation);
+  //  } catch (error) {
+  //    console.log(error);
+  //  }
+  //}
 
   onChange(e){
     const { value, name } = e.target;

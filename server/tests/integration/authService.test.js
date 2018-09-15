@@ -41,6 +41,7 @@ describe('auth service integration', () => {
     beforeEach(async () => {
       tenant = mock.generateTenantObj();
       savedTenant = await tenantService.saveTenant(tenant);
+      await tenantService.updateTenant({confirmed: true}, savedTenant.id);
       confirmationToken = mock.generateConfirmationToken(savedTenant);
       tokens = mock.generateTokenAndCsrfToken(savedTenant)
     })
@@ -57,6 +58,7 @@ describe('auth service integration', () => {
     });
   
     it('should log tenant in', async () => {
+
       const res = await request(server)
         .post(`${baseUrl}/login`)
         .send({ password: tenant.password, email: tenant.email });

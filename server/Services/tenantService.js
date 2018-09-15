@@ -51,7 +51,7 @@ const updateTenant = async (tenant, tenantId) => {
   const { identityObj, addressObj, userInfoObj } = tenantDTO.tenantDTOtoTenant(tenant);
 
   const result = await Promise.all([
-    identityDAO.updateIdentityByTenantId(identityObj, tenantId),
+    identityDAO.updateIdentityByTenantId(identityObj, tenantId, identityObj.password ? true : false),
     userInfoDAO.updateUserInfoByTenantId(userInfoObj, tenantId),
     addressDAO.updateAddressByTenantId(addressObj, tenantId),
     tenantDAO.findTenantById(tenantId)
@@ -106,12 +106,12 @@ const getTenantByEmail = async (email, done) => {
  */
 const checkTenantCredential = async (email, password, done) => {
   try {
-    const identity = await identityDAO.findIdentityByEmail(email);
-
+    const identity = await identityDAO.findIdentityByEmailAndConfirmed(email);
+    
     if (!identity) return done({ status: 401, message: 'Invalid email or password' }, false)
 
     const doesPasswordMatch = await comparePassword(password, identity.password);
-
+    
     if (!doesPasswordMatch) return done({ status: 401, message: 'Invalid email or passoword' }, false);
 
     const { tenantId } = identity;
