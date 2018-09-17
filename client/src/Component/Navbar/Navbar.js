@@ -10,8 +10,9 @@ const renderIfLogin = ({ auth }) => {
   return auth.isAuthorized
     ? (
       <React.Fragment>
-        <Menu.Item name='home' />
-        <Menu.Item name='my todos' as={Link} to='/todos'/>
+        <Menu.Item name='Dashboard' as={Link} to='/dashboard'/>
+        <Menu.Item name='Employees' />
+        <Menu.Item name='Settings' />
       </React.Fragment>
     ) : null
 }

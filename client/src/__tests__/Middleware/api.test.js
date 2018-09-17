@@ -1,8 +1,8 @@
 import api from '../../Middlewares/api';
 import moxios from 'moxios';
-import { todoUrl } from '../../Component/Todo/todo_actions';
 
 describe('Api Middleware', () => {
+  const todoUrl = '/someUrl'
   let fakeNext, fakeStore;
 
   beforeEach(() => {

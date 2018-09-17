@@ -1,8 +1,8 @@
 import refreshToken from '../../Middlewares/refreshToken';
 import moxios from 'moxios';
-import { todoUrl } from '../../Component/Todo/todo_actions';
 
 describe('Refresh token middleware', () => {
+  const todoUrl = '/someUrl';
   let fakeStore, fakeNext;
 
   const onSuccess = (data) => data;

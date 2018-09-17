@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import * as authActions from './Component/Auth/auth_actions';
 
 //Routes
-import Todos from './Component/Todo/Todos';
 import Signup from './Component/Auth/Signup';
 import Login from './Component/Auth/Login';
 import PrivateRoute from './Utils/PrivateRoute';
@@ -14,13 +13,14 @@ import ConfirmEmail from './Component/Auth/ConfirmEmail';
 import AfterSignup from './Component/Auth/AfterSignup';
 import GoogleAuth from './Component/Auth/GoogleAuth';
 import ResetPassword from './Component/Auth/ResetPassword';
+import TenantDashboard from './Component/TenantDashboard/TenantDashboard';
 
 export class App extends Component {
   render() {
 
-    const renderFirstPage = (isAuthorized) => (
+    const renderFirstPage = ({isAuthorized, id}) => (
       isAuthorized 
-        ? <Redirect to='/todos' />
+        ? <Redirect to={`/dashboard/${id}`} />
         : <Redirect to='/login' /> 
     );
 
@@ -34,10 +34,10 @@ export class App extends Component {
           <Route path='/signup/confirm/:tokenId' component={ConfirmEmail} />
           <Route path='/login/password/:tokenId' component={ResetPassword} />
           <Route path='/signup/confirm/' component={AfterSignup} />
-          <PrivateRoute path='/todos' component={Todos} auth={this.props.auth} />
+          <PrivateRoute path='/dashboard/:tenantId' component={TenantDashboard} auth={this.props.auth} />
           <Route path='/login' component={Login} />
           <Route path='/signup' component={Signup} />
-          {renderFirstPage(this.props.auth.isAuthorized)}
+          {renderFirstPage(this.props.auth)}
         </Switch>
       </div>
     );

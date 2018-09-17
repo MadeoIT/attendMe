@@ -103,7 +103,7 @@ exports.generateUserInfoFromDb = (fk) => ({
   userName: 'userName'
 });
 exports.generateTenantObjFromDB = () => ({
-  confirmed: false,
+  confirmed: true,
   blocked: false,
   email: 'email@email.com',
   updatedAt: '2018-09-11T08:32:41.849Z',

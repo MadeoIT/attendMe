@@ -19,6 +19,7 @@ const getTenant = async (req, res, next) => {
     );
 
     res.status(200).send(tenant);
+
   } catch (error) {
     next(error);
   }
