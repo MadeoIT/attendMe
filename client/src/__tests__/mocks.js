@@ -1,3 +1,11 @@
+/**
+ * CSS class convention naming: 
+ * 1- name of the component (camelCase not capitalize)
+ * 2- type of element (Ex: input, th, ul)
+ * 3- name of the props
+ * Ex: todoList-tr-content
+ */
+
 exports.generateTenantObj = () => ({
   email: 'email@email.com',
   password: 'password',
@@ -57,4 +65,52 @@ exports.generateTenantObjFromDB = () => ({
   id: 1
 });
 
-it('__', () => {});
+exports.generateEmployesArray = () => ([
+  {
+    email: 'email@email.com',
+    updatedAt: '2018-09-11T08:32:41.849Z',
+    createdAt: '2018-09-11T08:32:41.849Z',
+    lastName: 'lastName',
+    userName: 'userName',
+    firstName: 'firstName',
+    streetAddress: 'address 28 A',
+    postCode: '28103',
+    country: 'Finland',
+    state: null,
+    registered: true,
+    tenantId: 1,
+    id: 1
+  },
+  {
+    email: 'email2@email.com',
+    updatedAt: '2018-09-11T08:32:41.849Z',
+    createdAt: '2018-09-11T08:32:41.849Z',
+    lastName: 'lastName2',
+    userName: 'userName2',
+    firstName: 'firstName',
+    streetAddress: 'address 28 A',
+    postCode: '28103',
+    country: 'Finland',
+    state: null,
+    registered: true,
+    tenantId: 1,
+    id: 2
+  },
+  {
+    email: 'email3@email.com',
+    updatedAt: '2018-09-11T08:32:41.849Z',
+    createdAt: '2018-09-11T08:32:41.849Z',
+    lastName: 'lastName3',
+    userName: 'userName3',
+    firstName: 'firstName3',
+    streetAddress: 'address 28 A',
+    postCode: '28103',
+    country: 'Finland',
+    state: null,
+    registered: false,
+    tenantId: 1,
+    id: 3
+  }
+]);
+
+it('__', () => { });

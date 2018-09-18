@@ -4,10 +4,12 @@ import loading_reducer from '../Reducers/loading_reducer';
 import error_reducer from '../Reducers/error_reducer';
 import message_reducer from '../Reducers/message_reducer';
 import tenant_reducers from '../Component/TenantDashboard/tenant_reducers';
+import employee_reducers from '../Component/Employee/employee_reducers';
 
 export default combineReducers({
   auth: auth_reducers,
   tenant: tenant_reducers,
+  employee: employee_reducers,
   loading: loading_reducer,
   error: error_reducer,
   message: message_reducer

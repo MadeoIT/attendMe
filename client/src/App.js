@@ -14,6 +14,7 @@ import AfterSignup from './Component/Auth/AfterSignup';
 import GoogleAuth from './Component/Auth/GoogleAuth';
 import ResetPassword from './Component/Auth/ResetPassword';
 import TenantDashboard from './Component/TenantDashboard/TenantDashboard';
+import Employee from './Component/Employee/Employee';
 
 export class App extends Component {
   render() {
@@ -34,7 +35,10 @@ export class App extends Component {
           <Route path='/signup/confirm/:tokenId' component={ConfirmEmail} />
           <Route path='/login/password/:tokenId' component={ResetPassword} />
           <Route path='/signup/confirm/' component={AfterSignup} />
+
           <PrivateRoute path='/dashboard/:tenantId' component={TenantDashboard} auth={this.props.auth} />
+          <PrivateRoute path='/dashboard/:tenandId/employee' component={Employee} />
+          
           <Route path='/login' component={Login} />
           <Route path='/signup' component={Signup} />
           {renderFirstPage(this.props.auth)}
